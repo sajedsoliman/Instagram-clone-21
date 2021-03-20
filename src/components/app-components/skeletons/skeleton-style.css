@@ -1,0 +1,19 @@
+.skeleton-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 20px;
+    background: rgba(255,255,255,.65);
+    animation: animation-skeleton 1s infinite;
+}
+
+@keyframes animation-skeleton {
+    0% {
+        left: 0,
+    }
+    100% {
+        left: 100%
+    }
+}

@@ -1,0 +1,78 @@
+.image-gallery-container {
+    font-family: "Poppins";
+}
+
+.image-gallery-container:focus,
+.image-gallery-container div:focus
+{
+    outline: none;
+}
+
+
+.image-gallery-container .image-gallery-content .image-gallery-index {
+    background: rgb(47 47 47);
+    border-radius: 20px;
+    padding: 3px 7px;
+    font-size: 12px;
+    top: 8px;
+    right: 4px;
+}
+
+.image-gallery-container .image-gallery-content .image-gallery-bullets  {
+    position: absolute;
+    bottom: -15px;
+    padding-top: 5px
+}
+
+/* .image-gallery-container .image-gallery-content .image-gallery-slides .image-gallery-slide > div {
+    height: 100%;
+}
+
+.image-gallery-container .image-gallery-content .image-gallery-slides .image-gallery-slide > div img {
+    height: 100%;
+} */
+
+
+/* slide medias */
+/* medium screens */
+/* @media (max-width: 1440px) {
+    .image-gallery-container .image-gallery-content .image-gallery-slides .image-gallery-slide.portrait {
+        max-height: 600px;
+    }
+} */
+/* large screens */
+.image-gallery-container .image-gallery-content .image-gallery-slides .image-gallery-slide.portrait {
+    min-height: 600px;    
+    max-height: 600px;
+    height: 600px;
+}
+
+
+.image-gallery-container .image-gallery-content .image-gallery-slides .image-gallery-slide.landscape {
+    min-height: 450px;    
+    max-height: 450px;
+    height: 450px;
+}
+
+.image-gallery-container .image-gallery-content .image-gallery-slides .image-gallery-slide.landscape img {
+    height: 100%
+}
+
+.image-gallery-container .image-gallery-content .image-gallery-slides .image-gallery-slide.landscape .vsc-controller {
+    position: absolute;
+}
+.image-gallery-container .image-gallery-content .image-gallery-slides .image-gallery-slide.landscape video {
+    height: 100%
+}
+
+
+.image-gallery-container .image-gallery-content .image-gallery-bullets .image-gallery-bullets-container button {
+    padding: 4px;
+    box-shadow: none;
+    border-color: #000;
+}
+
+.image-gallery-container .image-gallery-content .image-gallery-bullets .image-gallery-bullets-container button.active {
+    background: rgb(0 0 0);
+    padding: 4px;
+}
