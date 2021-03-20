@@ -26,6 +26,7 @@ import "normalize.css"
 import "../styles/dist/main.min.css"
 import { ThemeProvider } from "@material-ui/core"
 import commonTheme from "./commonTheme"
+import Inbox from './app-components/pages/inbox/Inbox'
 
 
 export default function App() {
@@ -63,6 +64,11 @@ export default function App() {
                                 <UserProfile />
                             )} />
 
+                            {/* User inbox page - authed */}
+                            <AuthRoute path="/direct/inbox">
+                                <Inbox />
+                            </AuthRoute>
+
                             {/* User followers page - popup in desktops and full list in mobiles */}
                             <Route path="/:userId/followers" exact render={() => {
                                 return (
@@ -85,11 +91,6 @@ export default function App() {
                             {/* Single post page */}
                             <Route path="/:userId/p/:postId" render={(props) => (
                                 <SinglePost />
-                            )} />
-
-                            {/* 404 page & route */}
-                            <Route path="*" render={(props) => (
-                                <NotFound />
                             )} />
                         </Switch>
 
@@ -122,3 +123,11 @@ export default function App() {
         </div>
     )
 }
+
+/*
+
+                            404 page & route
+                            <Route path="*" render={(props) => (
+                                <NotFound />
+                            )} />
+*/

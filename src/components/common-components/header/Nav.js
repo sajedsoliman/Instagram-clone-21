@@ -109,7 +109,7 @@ export default function Nav({ handleLoginModalOpen, handleRegisterModalOpen }) {
             {
                 user ?
                     <div className={classes.secondaryLinks}>
-                        <Link href="/">
+                        <Link to="/direct/inbox" component={RouterLink}>
                             <InboxIcon />
                         </Link>
                         <Link href="/" >

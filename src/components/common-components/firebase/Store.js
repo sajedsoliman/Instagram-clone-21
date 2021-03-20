@@ -286,6 +286,40 @@ function Store() {
             })
     }
 
+    // Bring a user chats
+    const getUserChats = (authUserId, setChats) => {
+        db.collection("members")
+            .doc(authUserId)
+            .collection("chats")
+            .get()
+            .then(snapshot => {
+                setChats(snapshot.docs.map(doc => ({ chat: doc.data(), id: doc.id })))
+            })
+    }
+
+    // handle fetching a single chat
+    const getChat = (userId, chatId, setChat) => {
+        db.collection("members")
+            .doc(userId)
+            .collection("chats")
+            .doc(chatId)
+            .onSnapshot(snapshot => setChat({ ...snapshot.data() }))
+    }
+
+    // handle putting a listener on a user's chat messages
+    const getChatMessages = (userId, chatId, setMessages) => {
+        db.collection("members")
+            .doc(userId)
+            .collection("chats")
+            .doc(chatId)
+            .collection("messages")
+            .onSnapshot(snapshot => {
+                const messages = snapshot.docs.map(doc => ({ id: doc.id, message: doc.data() }))
+                setMessages(messages)
+            })
+    }
+
+
     return {
         posts,
         getSuggestedPosts,
@@ -302,7 +336,10 @@ function Store() {
         deletePost,
         getSearchMembers,
         signUpUserWithEmail,
+        getUserChats,
         setLoading,
+        getChat,
+        getChatMessages,
         loading,
     }
 }

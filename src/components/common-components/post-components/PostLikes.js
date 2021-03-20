@@ -52,8 +52,6 @@ function PostLikes(props) {
             .collection("user_posts")
             .doc(docId)
             .onSnapshot(snapshot => {
-                console.log("here")
-
                 // The question mark is because I put a listener on likes not on the post as whole
                 setLikers(snapshot.data()?.likedBy)
             })

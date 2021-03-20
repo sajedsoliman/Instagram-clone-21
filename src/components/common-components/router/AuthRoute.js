@@ -1,15 +1,14 @@
 // Router
 import { Redirect, Route } from 'react-router-dom'
 
-// Contexts - to get the already logged user
-import { AuthedUser } from '../../user-context/AuthedUserContext'
+// bring the auth function to check users status
+import { auth } from '../firebase/database'
 
 function AuthRoute({ children, ...other }) {
-    const loggedUser = AuthedUser()
 
     return (
         <Route {...other} render={({ location }) =>
-            loggedUser && loggedUser.uid ? (
+            auth.currentUser ? (
                 children
             ) : (
                 <Redirect to={{
