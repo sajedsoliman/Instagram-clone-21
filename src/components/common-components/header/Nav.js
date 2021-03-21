@@ -19,7 +19,7 @@ import { Settings, SupervisedUserCircle } from '@material-ui/icons'
 // component imports / info
 import CustomMenuList from "../CustomMenuList"
 import info from "./info"
-import { auth } from "../firebase/database"
+import { auth, db } from "../firebase/database"
 import { AuthedUser } from '../../user-context/AuthedUserContext'
 import { Divider } from '@material-ui/core'
 
@@ -87,7 +87,14 @@ export default function Nav({ handleLoginModalOpen, handleRegisterModalOpen }) {
 
     // handle logout
     const handleLogout = () => {
-        auth.signOut()
+        // update user's active state to false
+        db.collection("members")
+            .doc(user.uid)
+            .update({
+                active: false
+            }).then(success => {
+                auth.signOut()
+            })
     }
 
     const classes = useStyles()

@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 // Firebase imports
-import { db, auth, storage, } from "./database";
+import { db, auth, storage, firebase } from "./database";
 
 // component imports
 import { useAlert } from "../../notification-context/NotificationContext";
@@ -291,8 +291,7 @@ function Store() {
         db.collection("members")
             .doc(authUserId)
             .collection("chats")
-            .get()
-            .then(snapshot => {
+            .onSnapshot(snapshot => {
                 setChats(snapshot.docs.map(doc => ({ chat: doc.data(), id: doc.id })))
             })
     }
@@ -303,7 +302,7 @@ function Store() {
             .doc(userId)
             .collection("chats")
             .doc(chatId)
-            .onSnapshot(snapshot => setChat({ ...snapshot.data() }))
+            .onSnapshot(snapshot => setChat(snapshot.exists ? { ...snapshot.data() } : null))
     }
 
     // handle putting a listener on a user's chat messages
@@ -313,12 +312,142 @@ function Store() {
             .collection("chats")
             .doc(chatId)
             .collection("messages")
+            .orderBy("createdDate", "asc")
             .onSnapshot(snapshot => {
                 const messages = snapshot.docs.map(doc => ({ id: doc.id, message: doc.data() }))
                 setMessages(messages)
             })
     }
 
+    // handle send a message to both of two members
+    const handleSendMessage = (chatId, loggedUserId, senderName, senToId, msgText) => {
+        // handle update the chat's last message
+
+        // For the logged user
+        db.collection("members")
+            .doc(loggedUserId)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                lastMsg: {
+                    id: loggedUserId,
+                    text: msgText
+                }
+            })
+
+        // For the senTo user
+        /* db.collection("members")
+            .doc(senToId)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                lastMsg: {
+                    id: loggedUserId,
+                    text: msgText
+                }
+            }) */
+
+        const messageObj = {
+            senderId: loggedUserId,
+            body: msgText,
+            createdDate: firebase.firestore.FieldValue.serverTimestamp(),
+            sender: senderName
+        }
+
+        // handle add the message to loggedUser chat
+        db.collection("members")
+            .doc(loggedUserId)
+            .collection("chats")
+            .doc(chatId)
+            .collection("messages")
+            .add(messageObj)
+
+        // handle add the message to SenTo chat
+        db.collection("members")
+            .doc(senToId)
+            .collection("chats")
+            .doc(chatId)
+            .get()
+            .then(chatDoc => {
+                if (chatDoc.data() == undefined) {
+                    // Create a new chat to the senTo user
+                    createChat(senToId, chatId)
+
+                    // then the the message
+                    chatDoc.ref.collection("messages")
+                        .add(messageObj)
+                } else {
+                    // just send the message cuz the user has the chat
+                    chatDoc.ref.collection("messages")
+                        .add(messageObj)
+                }
+            })
+    }
+
+    // get the senTo user status (active or not)
+    const getUserStatus = (userId, setUserStatus) => {
+        db.collection("members")
+            .doc(userId)
+            .get()
+            .then(user => {
+                setUserStatus(user.data().active)
+            })
+    }
+
+    // handle chat mute
+    const toggleChatMute = (chatId, newValue) => {
+        // handle mute the chat just at the user who wanna mute it 
+        db.collection("members")
+            .doc(loggedUser.uid)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                isMuted: newValue
+            })
+    }
+
+    // handle delete one-side chat (for just one user (logged user))
+    const deleteChat = (chatId, deleteCallback) => {
+        // delete just the chat without messages(collection)
+        console.log(loggedUser.uid)
+        db.collection("members")
+            .doc(loggedUser.uid)
+            .collection("chats")
+            .doc(chatId)
+            .collection("messages")
+            .delete(success => {
+                db.collection("members")
+                    .doc(loggedUser.uid)
+                    .collection("chats")
+                    .doc(chatId)
+                    .delete(succes => deleteCallback)
+            })
+            .catch(err => console.log(err.message))
+    }
+
+    // handle create a new chat
+    const createChat = (userId, chatId) => {
+        const chatObj = {
+            isMuted: false,
+            lastMsg: {},
+            members: [
+                {
+                    id: userId,
+                },
+                {
+                    id: loggedUser.uid,
+                    username: loggedUser.username,
+                    avatar: loggedUser.avatar
+                }
+            ]
+        }
+
+        db.collection("members")
+            .doc(userId)
+            .collection("chats")
+            .doc(chatId)
+            .set(chatObj)
+    }
 
     return {
         posts,
@@ -340,6 +469,10 @@ function Store() {
         setLoading,
         getChat,
         getChatMessages,
+        handleSendMessage,
+        getUserStatus,
+        toggleChatMute,
+        deleteChat,
         loading,
     }
 }

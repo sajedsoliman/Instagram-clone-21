@@ -15,15 +15,21 @@ export function AuthedUserProvider({ children }) {
     useEffect(() => {
         auth.onAuthStateChanged(authedUser => {
             if (authedUser) {
-                // get user info from database
+                // update user's active state to true
                 db.collection("members")
                     .doc(authedUser.uid)
-                    .get()
-                    .then(savedUser => {
-                        const fetchedUser = savedUser.data()
-                        setAuthUser({ ...fetchedUser, uid: authedUser.uid })
+                    .update({
+                        active: true
+                    }).then(success => {
+                        // get user info from database
+                        db.collection("members")
+                            .doc(authedUser.uid)
+                            .get()
+                            .then(savedUser => {
+                                const fetchedUser = savedUser.data()
+                                setAuthUser({ ...fetchedUser, uid: authedUser.uid })
+                            })
                     })
-
             } else {
                 // if the user has logged out -> remove them
                 setAuthUser(null)

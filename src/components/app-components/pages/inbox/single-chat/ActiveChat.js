@@ -27,7 +27,6 @@ function ActiveChat() {
     // State vars
     const [details, setDetails] = useState(false)
 
-
     // handel toggle chat details
     const toggleDetailsHandler = () => {
         setDetails(!details)
@@ -43,6 +42,8 @@ function ActiveChat() {
             getChat(loggedUser.uid, chatId, setChat)
         }
     }, [chatId])
+
+    console.log(chat)
 
     if (chat == null) return null
 
@@ -61,9 +62,9 @@ function ActiveChat() {
             <ChatHeader {...headerProps} />
             {
                 details ? (
-                    <ChatDetails />
+                    <ChatDetails senToMember={senToMember} chatId={chatId} chat={chat} />
                 ) : (
-                    <ChatMessages chatId={chatId} userId={loggedUser.uid} />
+                    <ChatMessages setToMember={senToMember} chatId={chatId} userId={loggedUser.uid} />
                 )
             }
         </>

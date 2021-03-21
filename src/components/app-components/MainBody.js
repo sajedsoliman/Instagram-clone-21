@@ -60,7 +60,6 @@ export default function MainBody() {
             }
         }, [location]) */
 
-
     const classes = useStyles()
     return (
         <div className={classes.appBody}>

@@ -47,7 +47,6 @@ function ChatsSide() {
     // use Effect to get all user's chats
     useEffect(() => {
         if (loggedUser) {
-
             // fetch their chats
             getUserChats(loggedUser.uid, setChats)
         }

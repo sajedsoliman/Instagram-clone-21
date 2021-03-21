@@ -47,7 +47,7 @@ function Inbox() {
                         </Grid>
 
                         {/* active (opened chat) - using another switch here (nesting system) */}
-                        <Grid item xs={12} md={8}>
+                        <Grid className={classes.gridItem} item xs={12} md={8}>
                             <Switch location={location}>
                                 <Route path={path} exact>
                                     <SendMessageSide />
