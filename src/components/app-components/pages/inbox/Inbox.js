@@ -33,6 +33,7 @@ function Inbox() {
     // Router imports
     const { path } = useRouteMatch()
     const location = useLocation()
+    const background = location.state && location.state.background
 
 
     return (
@@ -48,7 +49,7 @@ function Inbox() {
 
                         {/* active (opened chat) - using another switch here (nesting system) */}
                         <Grid className={classes.gridItem} item xs={12} md={8}>
-                            <Switch location={location}>
+                            <Switch>
                                 <Route path={path} exact>
                                     <SendMessageSide />
                                 </Route>

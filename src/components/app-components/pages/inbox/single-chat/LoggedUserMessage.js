@@ -5,9 +5,12 @@ import { Grow, makeStyles, Typography } from '@material-ui/core'
 const useStyles = makeStyles(theme => ({
     message: {
         marginLeft: "auto",
-        border: "none !important",
         background: "rgb(232 232 232)",
-        color: "rgb(21 21 21)"
+        color: "rgb(21 21 21)",
+        padding: 10,
+        borderRadius: 20,
+        maxWidth: "50%",
+        wordBreak: "break-word"
     }
 }))
 

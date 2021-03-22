@@ -27,11 +27,13 @@ import "../styles/dist/main.min.css"
 import { ThemeProvider } from "@material-ui/core"
 import commonTheme from "./commonTheme"
 import Inbox from './app-components/pages/inbox/Inbox'
+import ActiveChat from './app-components/pages/inbox/single-chat/ActiveChat'
 
 
 export default function App() {
     const location = useLocation()
     const background = location.state && location.state.background
+
 
     return (
         <div>
@@ -112,6 +114,13 @@ export default function App() {
                         {
                             background && (
                                 <Route path="/:userId/p/:postId" render={(props) => <FullScreenPostModal />
+                                } />
+                            )
+                        }
+                        {/* Show the whole active chat if the window width < 960px */}
+                        {
+                            background && (
+                                <Route path="/direct/inbox/t/:chatId" render={(props) => <ActiveChat />
                                 } />
                             )
                         }

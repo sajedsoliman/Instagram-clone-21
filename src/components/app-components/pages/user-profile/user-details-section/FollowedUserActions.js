@@ -1,14 +1,17 @@
+import { Link as RouterLink, useHistory } from 'react-router-dom'
 import { useState } from 'react';
-import { Link as RouterLink } from 'react-router-dom'
 
 // UI imports
 import { makeStyles, Button } from "@material-ui/core"
 
-// component imports
-import UnFollowModal from '../../../../common-components/user-related/UnFollowModal';
-
 // icons
 import PersonAddDisabled from '@material-ui/icons/PersonAddDisabled';
+
+
+// component imports
+import UnFollowModal from '../../../../common-components/user-related/UnFollowModal';
+import Store from '../../../../common-components/firebase/Store';
+
 
 // styles
 const useStyles = makeStyles(theme => ({
@@ -21,12 +24,14 @@ const useStyles = makeStyles(theme => ({
     },
     removeFollowerBtn: {
         minWidth: 80,
-
     }
 }))
 
 function FollowedUserActions({ user }) {
     const classes = useStyles()
+
+    // Router
+    const history = useHistory()
 
     // State vars
     const [modalOpen, setModalOpen] = useState({ title: "", isOpen: false })
@@ -44,11 +49,23 @@ function FollowedUserActions({ user }) {
         className
     })
 
+
+    // Import Store component to create a new chat and some checks
+    const { createChat } = Store()
+
+    // handle click message btn
+    const HandleCreateChat = async () => {
+        // Check if the user has a chat with the user in this profile
+        // go to the chat id (either it's now or already exists)
+        history.replace(`direct/inbox/t/${await createChat(user)}`)
+
+    }
+
     return (
         <div className={classes.wrapper}>
             {/* Send a message when set the chat functionality - add (to) attr later */}
             <Button
-                component={RouterLink}
+                onClick={HandleCreateChat}
                 {...btnProps()}>
                 Message
             </Button>

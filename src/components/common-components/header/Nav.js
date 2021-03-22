@@ -109,7 +109,7 @@ export default function Nav({ handleLoginModalOpen, handleRegisterModalOpen }) {
 
     return (
         <nav className={classes.linkNav}>
-            <Link href="/">
+            <Link to="/" component={RouterLink}>
                 {Boolean(anchorEl) ? <HomeOutlined fontSize="large" /> : <Home fontSize="large" />}
             </Link>
 

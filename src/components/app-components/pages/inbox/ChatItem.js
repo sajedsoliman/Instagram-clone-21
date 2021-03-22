@@ -1,12 +1,16 @@
-import { Link as RouterLink } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 
+// Router
+import { Link as RouterLink, useLocation } from 'react-router-dom'
 
 // UI imports
-import { Avatar, Badge, ListItem, ListItemAvatar, ListItemText, makeStyles } from '@material-ui/core'
-import { useEffect, useState } from 'react'
-import Store from '../../../common-components/firebase/Store'
+import { Avatar, Badge, ListItem, ListItemAvatar, ListItemText, makeStyles, Typography } from '@material-ui/core'
+
+// Icons
+import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
 
 // Component imports
+import Store from '../../../common-components/firebase/Store'
 
 // style staff
 const useStyles = makeStyles(theme => ({
@@ -14,6 +18,17 @@ const useStyles = makeStyles(theme => ({
         backgroundColor: '#44b700',
         color: '#44b700',
         boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    },
+    chatAdditionalInfoTypo: {
+        "& span": {
+            display: "flex",
+            alignItems: "center",
+
+            "& .MuiSvgIcon-root": {
+                fontSize: ".35rem",
+                margin: "0 5px"
+            }
+        }
     }
 }))
 
@@ -22,6 +37,9 @@ function ChatItem({ chat, authUserId, chatDocId }) {
 
     // destructuring the chat
     const { lastMsg, members } = chat
+
+    // Router
+    const location = useLocation()
 
     // Get some info
     const senToMember = members.find(member => member.id != authUserId)
@@ -50,8 +68,32 @@ function ChatItem({ chat, authUserId, chatDocId }) {
         invisible: !isUserActive
     }
 
+    // handle getting the chat additional info (user the chat's username) (usually being the lastMsg but not always)
+    const handleChatAdditionalInfo = () => {
+        const { id, text, sendDate } = lastMsg
+
+
+        let res
+        // check if you own the last message
+        if (lastMsg.id == authUserId) {
+            res = <span>{text} <FiberManualRecord fontSize='small' /> You</span>
+        } else {
+            res = text
+        }
+
+        return res
+    }
+
     return (
-        <ListItem button to={{ pathname: `/direct/inbox/t/${chatDocId}` }} component={RouterLink}>
+        <ListItem button to={{
+            pathname: `/direct/inbox/t/${chatDocId}`, ...(window.innerWidth < 960 ? {
+                state: {
+                    background: {
+                        pathname: location
+                    }
+                }
+            } : {})
+        }} component={RouterLink}>
             <ListItemAvatar>
                 <Badge {...badgeProps}>
                     <Avatar src={senToMember.avatar} />
@@ -59,7 +101,10 @@ function ChatItem({ chat, authUserId, chatDocId }) {
             </ListItemAvatar>
 
             {/* To edited with an advanced algorithm */}
-            <ListItemText primary={senToMember.username} secondary={lastMsg.text} />
+            <ListItemText
+                primary={senToMember.username}
+                secondaryTypographyProps={{ className: classes.chatAdditionalInfoTypo }}
+                secondary={handleChatAdditionalInfo()} />
         </ListItem>
     )
 }

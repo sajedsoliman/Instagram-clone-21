@@ -55,6 +55,7 @@ function ChatDetails({ chat, senToMember, chatId, }) {
     // Imports Store to change the change muted value
     const { toggleChatMute } = Store()
 
+
     // handle toggle chat mute
     const toggleMute = (e) => {
         toggleChatMute(chatId, e.target.checked)
@@ -78,16 +79,11 @@ function ChatDetails({ chat, senToMember, chatId, }) {
 
     // handle delete the chat
     function handleDeleteChat() {
-        deleteChat(chatId, onDelete)
+        // back to inbox
+        history.replace("/direct/inbox")
 
-        function onDelete() {
-            // Close the dialog
-            handleDialogOpen()
-
-            console.log("here")
-            // back to inbox
-            history.replace("/direct/inbox")
-        }
+        // Then delete the chat
+        deleteChat(chatId)
     }
 
 

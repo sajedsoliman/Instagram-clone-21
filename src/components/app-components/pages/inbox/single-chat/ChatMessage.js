@@ -13,18 +13,11 @@ const useStyles = makeStyles(theme => ({
     msgWrapper: {
         display: "flex",
         marginBottom: 10,
-
-        "& > *": {
-            maxWidth: "50%",
-            border: "1px solid",
-            padding: 10,
-            borderRadius: 20,
-        },
     }
 }))
 
 
-function ChatMessage({ message }) {
+function ChatMessage({ message, senToUser }) {
     const loggedUser = AuthedUser()
     const classes = useStyles()
 
@@ -38,7 +31,7 @@ function ChatMessage({ message }) {
                     isYours ? (
                         <LoggedUserMessage messageBody={message.body} />
                     ) : (
-                        <SenToMessage messageBody={message.body} />
+                        <SenToMessage senToUser={senToUser} messageBody={message.body} />
                     )
                 }
             </div>

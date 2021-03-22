@@ -43,8 +43,6 @@ function ActiveChat() {
         }
     }, [chatId])
 
-    console.log(chat)
-
     if (chat == null) return null
 
     // Get some info
@@ -64,7 +62,7 @@ function ActiveChat() {
                 details ? (
                     <ChatDetails senToMember={senToMember} chatId={chatId} chat={chat} />
                 ) : (
-                    <ChatMessages setToMember={senToMember} chatId={chatId} userId={loggedUser.uid} />
+                    <ChatMessages senToMember={senToMember} chatId={chatId} userId={loggedUser.uid} />
                 )
             }
         </>

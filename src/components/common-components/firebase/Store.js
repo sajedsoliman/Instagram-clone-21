@@ -312,7 +312,7 @@ function Store() {
             .collection("chats")
             .doc(chatId)
             .collection("messages")
-            .orderBy("createdDate", "asc")
+            .orderBy("sendDate", "asc")
             .onSnapshot(snapshot => {
                 const messages = snapshot.docs.map(doc => ({ id: doc.id, message: doc.data() }))
                 setMessages(messages)
@@ -322,35 +322,34 @@ function Store() {
     // handle send a message to both of two members
     const handleSendMessage = (chatId, loggedUserId, senderName, senToId, msgText) => {
         // handle update the chat's last message
-
         // For the logged user
+        const lastMsg = {
+            id: loggedUserId,
+            text: msgText,
+            sendDate: firebase.firestore.FieldValue.serverTimestamp()
+        }
         db.collection("members")
             .doc(loggedUserId)
             .collection("chats")
             .doc(chatId)
             .update({
-                lastMsg: {
-                    id: loggedUserId,
-                    text: msgText
-                }
+                lastMsg: { ...lastMsg }
             })
 
         // For the senTo user
-        /* db.collection("members")
+        db.collection("members")
             .doc(senToId)
             .collection("chats")
             .doc(chatId)
             .update({
-                lastMsg: {
-                    id: loggedUserId,
-                    text: msgText
-                }
-            }) */
+                lastMsg: { ...lastMsg }
+            })
 
+        // message object
         const messageObj = {
             senderId: loggedUserId,
             body: msgText,
-            createdDate: firebase.firestore.FieldValue.serverTimestamp(),
+            sendDate: firebase.firestore.FieldValue.serverTimestamp(),
             sender: senderName
         }
 
@@ -371,14 +370,18 @@ function Store() {
             .then(chatDoc => {
                 if (chatDoc.data() == undefined) {
                     // Create a new chat to the senTo user
-                    createChat(senToId, chatId)
+                    createChatForSenToUser(senToId, chatId)
 
-                    // then the the message
-                    chatDoc.ref.collection("messages")
+                    // then add the message
+                    chatDoc
+                        .ref
+                        .collection("messages")
                         .add(messageObj)
                 } else {
                     // just send the message cuz the user has the chat
-                    chatDoc.ref.collection("messages")
+                    chatDoc
+                        .ref
+                        .collection("messages")
                         .add(messageObj)
                 }
             })
@@ -407,32 +410,38 @@ function Store() {
     }
 
     // handle delete one-side chat (for just one user (logged user))
-    const deleteChat = (chatId, deleteCallback) => {
-        // delete just the chat without messages(collection)
-        console.log(loggedUser.uid)
+    const deleteChat = (chatId) => {
+        // Delete the chat messages before delete the parent chat
         db.collection("members")
             .doc(loggedUser.uid)
             .collection("chats")
             .doc(chatId)
             .collection("messages")
-            .delete(success => {
+            .get()
+            .then(snapshot => {
+                // Delete all messages - loop cuz we can't delete collections in firebase with code (just manually)
+                snapshot.forEach(doc => {
+                    doc.ref.delete()
+                })
+
+                // then delete the entire chat
                 db.collection("members")
                     .doc(loggedUser.uid)
                     .collection("chats")
                     .doc(chatId)
-                    .delete(succes => deleteCallback)
+                    .delete()
             })
-            .catch(err => console.log(err.message))
     }
 
-    // handle create a new chat
-    const createChat = (userId, chatId) => {
+    // handle create a new chat if one-side of users have chat with the other - for the senToUser
+    const createChatForSenToUser = (userId, chatId) => {
         const chatObj = {
             isMuted: false,
             lastMsg: {},
             members: [
                 {
                     id: userId,
+
                 },
                 {
                     id: loggedUser.uid,
@@ -447,6 +456,95 @@ function Store() {
             .collection("chats")
             .doc(chatId)
             .set(chatObj)
+    }
+
+    // handle create a new chat if one-side of users have chat with the other
+    const createChatForLoggedUser = (senToUser, chatId) => {
+        const chatObj = {
+            isMuted: false,
+            lastMsg: {},
+            members: [
+                {
+                    id: loggedUser.id,
+
+                },
+                {
+                    id: senToUser.uid,
+                    username: senToUser.username,
+                    avatar: senToUser.avatar
+                }
+            ]
+        }
+
+        if (chatId == "" || chatId == null) {
+            // return the new chat's id
+            return db.collection("members")
+                .doc(loggedUser.id)
+                .collection("chats")
+                .add(chatObj)
+                .then(chat => chat.id)
+        } else {
+            db.collection("members")
+                .doc(loggedUser.id)
+                .collection("chats")
+                .doc(chatId)
+                .set(chatObj)
+            return chatId
+        }
+
+    }
+
+    // handle create a new chat when click on message button in the profile or from that dialog if I add it later
+    const createChat = (senToUser) => {
+        // Check if the logged has a chat with them
+        const chatId = db
+            .collection("members")
+            .doc(loggedUser.uid)
+            .collection("chats")
+            .where("members", "array-contains", { id: senToUser.id, username: senToUser.username, avatar: senToUser.avatar })
+            .get()
+            .then(async snapshot => {
+                if (snapshot.empty) {
+                    // check if they a chat with you to get its id
+                    const senToUserChatId = db
+                        .collection("members")
+                        .doc(senToUser.id)
+                        .collection("chats")
+                        .where("members", "array-contains",
+                            { id: loggedUser.uid, username: loggedUser.username, avatar: loggedUser.avatar })
+                        .get()
+                        .then(chat => {
+                            // Another check => 1.if they have a chat with you get its id and create a new chat for yo
+                            if (chat.docs[0].id == undefined || !chat.docs[0].exists) {
+                                // Create it without that id
+                                return ""
+                            } else {
+                                // return its id
+                                return chat.docs[0].id
+                            }
+                        })
+
+                    // Create a chat for the logged user depend on that id which we got from the code block above
+                    return createChatForLoggedUser(senToUser, await senToUserChatId)
+
+                    // return the chat id 
+                } else {
+                    // i have the chat
+                    return snapshot.docs[0].id
+                }
+            })
+
+        return chatId
+
+        /* // Check if the setTo user has a chat with you
+        db
+            .collection("members")
+            .doc(senToUser.id)
+            .collection("chats")
+            .where("members", "array-contains",
+                { id: loggedUser.uid, username: loggedUser.username, avatar: loggedUser.avatar })
+            .get()
+            .then(snapshot => console.log(snapshot.empty)) */
     }
 
     return {
@@ -472,6 +570,7 @@ function Store() {
         handleSendMessage,
         getUserStatus,
         toggleChatMute,
+        createChat,
         deleteChat,
         loading,
     }

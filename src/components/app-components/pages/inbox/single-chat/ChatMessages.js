@@ -20,13 +20,23 @@ const useStyles = makeStyles(theme => ({
         boxSizing: "border-box",
         height: "calc(100% - 65px)", /* 65px => add message form height */
         maxHeight: "calc(100% - 65px)", /* 65px => add message form height */
-        overflowY: "scroll"
+        overflowY: "scroll",
+        overflowX: "hidden",
+
+        // scroll shape
+        "&::-webkit-scrollbar": {
+            backgroundColor: "transparent",
+            width: 2
+        },
+        "&::-webkit-scrollbar-thumb": {
+            backgroundColor: "rgb(9 140 232 / 85%)"
+        }
     },
     messagesList: {
     }
 }))
 
-function ChatMessages({ chatId, userId, setToMember }) {
+function ChatMessages({ chatId, userId, senToMember }) {
     const classes = useStyles()
 
     // Ref
@@ -56,13 +66,13 @@ function ChatMessages({ chatId, userId, setToMember }) {
     // map through messages
     const mappedMessages = messages.map(msg => {
         const { id, message } = msg
-        return <ChatMessage key={id} message={message} />
+        return <ChatMessage key={id} message={message} senToUser={senToMember} />
     })
 
     // add message form props
     const messageFormProps = {
         chatId,
-        senToId: setToMember.id,
+        senToId: senToMember.id,
         loggedUserId: userId,
     }
 
