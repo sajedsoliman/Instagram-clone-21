@@ -63,16 +63,7 @@ function UserInfo(props) {
     const { avatar, fullName, username, id } = user
 
     // State variables
-    const [postsCount, setPostsCount] = useState(0)
     const [modalInfo, setModalInfo] = useState({ isOpen: false, title: "Change Profile Image" })
-
-    // get userPosts count from database
-    useEffect(() => {
-        db.collection("posts").doc(id).collection("user_posts").get()
-            .then(userPosts => {
-                setPostsCount(userPosts.docs.length)
-            })
-    }, [])
 
     // handle toggle change avatar modal
     const handleModalOpen = () => {
@@ -82,7 +73,7 @@ function UserInfo(props) {
     }
 
     // Check that if the user if logged and they own this profile
-    const isLoggedOwner = Boolean(loggedUser) && (loggedUser.username == username)
+    const isLoggedOwner = loggedUser != "no user" && (loggedUser.username == username)
 
     return (
         <Grid className={classes.infoWrapper} container>
@@ -93,7 +84,7 @@ function UserInfo(props) {
                     handleModalOpen={handleModalOpen}
                     progressSize={window.innerWidth > 600 ? 170 : 95}
                     avatar={avatar}
-                    userId={loggedUser?.uid}
+                    userId={loggedUser.uid}
                     fullName={fullName} />
             </Grid>
 

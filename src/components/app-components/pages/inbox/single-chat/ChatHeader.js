@@ -15,7 +15,11 @@ import { Info, InfoOutlined } from '@material-ui/icons'
 const useStyles = makeStyles(theme => ({
     header: {
         borderBottom: `1px solid ${theme.palette.divider}`,
-        height: 35
+        height: 35,
+        [theme.breakpoints.down(960)]: {
+            marginTop: 60,
+            borderTop: `1px solid ${theme.palette.divider}`,
+        }
     },
     avatar: {
         width: 35,

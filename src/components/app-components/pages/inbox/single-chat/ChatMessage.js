@@ -1,5 +1,6 @@
 // UI imports
 import { Grow, makeStyles } from '@material-ui/core'
+import { useState } from 'react'
 
 // Contexts
 import { AuthedUser } from '../../../../user-context/AuthedUserContext'
@@ -21,17 +22,31 @@ function ChatMessage({ message, senToUser }) {
     const loggedUser = AuthedUser()
     const classes = useStyles()
 
+    // State var
+    const [msgOptions, setMsgOptions] = useState(true)
+
+    // handle show msg options icon
+    const handleMsgOptionsShow = () => {
+        setMsgOptions(true)
+    }
+
+    // handle vanish msg options icon
+    const handleMsgOptionsClose = () => {
+        setMsgOptions(false)
+    }
+
     // Check if the message is yours
     const isYours = message.senderId == loggedUser.uid
 
     return (
         <Grow in={true}>
-            <div className={classes.msgWrapper}>
+            <div className={classes.msgWrapper} onMouseLeave={handleMsgOptionsClose}
+                onMouseOver={handleMsgOptionsShow}>
                 {
                     isYours ? (
-                        <LoggedUserMessage messageBody={message.body} />
+                        <LoggedUserMessage msgOptions={msgOptions} messageBody={message.body} />
                     ) : (
-                        <SenToMessage senToUser={senToUser} messageBody={message.body} />
+                        <SenToMessage msgOptions={msgOptions} senToUser={senToUser} messageBody={message.body} />
                     )
                 }
             </div>

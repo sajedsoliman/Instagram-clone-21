@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 // Material-Ui imports
 import { CardContent, Typography, makeStyles, Collapse } from "@material-ui/core";
 
+// Contexts
+import { AuthedUser } from "../../user-context/AuthedUserContext";
+
 
 // component imports
 import { db } from "../../common-components/firebase/database";
@@ -22,6 +25,7 @@ const useStyles = makeStyles(theme => ({
 
 function PostCardBody(props) {
     const classes = useStyles()
+    const loggedUser = AuthedUser()
 
     // destructuring through props
     const { caption, user, docId, likedBy, post } = props
@@ -37,7 +41,8 @@ function PostCardBody(props) {
             .doc(post.user.id)
             .collection("user_posts")
             .doc(docId)
-            .collection("post_comments").onSnapshot(snapshot => {
+            .collection("post_comments")
+            .onSnapshot(snapshot => {
                 setComments(snapshot.docs.map(doc => doc.data()))
             })
     }, [])

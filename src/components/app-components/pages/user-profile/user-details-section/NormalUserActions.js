@@ -42,7 +42,7 @@ function NormalUserActions({ user }) {
 
     // Some checks
     // if you have followed or haven't
-    const followerObj = followers.find(follower => follower.id == loggedUser?.id)
+    const followerObj = followers.find(follower => follower.id == loggedUser.id)
     const isFollowed = Boolean(followerObj)
 
     // Render the app actions depending on followed or not

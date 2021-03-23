@@ -8,8 +8,8 @@ function UnAuthRoute({ children, ...other }) {
     const loggedUser = AuthedUser()
 
     return (
-        <Route {...other} render={({ location }) =>
-            !(loggedUser && loggedUser.uid) ? (
+        <Route {...other} render={(props) =>
+            loggedUser == "no user" ? (
                 children
             ) : (
                 <Redirect to={{

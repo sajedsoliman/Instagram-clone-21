@@ -45,10 +45,15 @@ function AddCommentForm(props) {
 
         const comment = {
             text,
-            commenter: loggedUser?.fullName || "Guest"
+            commenter: loggedUser.fullName || "Guest"
         }
 
-        db.collection("posts").doc(user.id).collection("user_posts").doc(docId).collection("post_comments").add(comment)
+        db.collection("posts")
+            .doc(user.id)
+            .collection("user_posts")
+            .doc(docId)
+            .collection("post_comments")
+            .add(comment)
             .then(post => {
                 setText("")
             })

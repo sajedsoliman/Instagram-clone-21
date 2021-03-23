@@ -158,15 +158,13 @@ function Store() {
     }
 
     // Get single post
-    const getPost = (creatorId, postId, setPost) => {
-        db.collection("posts")
+    const getPost = (creatorId, postId) => {
+        return db.collection("posts")
             .doc(creatorId)
             .collection("user_posts")
             .doc(postId)
             .get()
-            .then(snapshot => {
-                setPost(snapshot.data())
-            })
+            .then(snapshot => snapshot.data())
     }
 
     // get user followers
@@ -213,7 +211,7 @@ function Store() {
 
     // handle follow users
     const handleFollow = (authUser, followedUser) => {
-        if (authUser != null) {
+        if (authUser != "no user") {
             // add them to your following list
             db
                 .collection("members")
@@ -274,7 +272,7 @@ function Store() {
             .collection("user_posts")
             .doc(postId)
             .delete()
-            .then(success => successCallback)
+            .then(success => successCallback())
     }
 
     // handle get search members
@@ -515,7 +513,7 @@ function Store() {
                         .get()
                         .then(chat => {
                             // Another check => 1.if they have a chat with you get its id and create a new chat for yo
-                            if (chat.docs[0].id == undefined || !chat.docs[0].exists) {
+                            if (chat.docs[0]?.id == undefined || !chat.docs[0].exists) {
                                 // Create it without that id
                                 return ""
                             } else {

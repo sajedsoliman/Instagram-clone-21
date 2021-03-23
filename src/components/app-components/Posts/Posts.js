@@ -12,7 +12,7 @@ export default function Posts({ loggedUser }) {
     const [posts, setPosts] = useState([])
 
     useEffect(() => {
-        if (loggedUser) {
+        if (loggedUser != "no user") {
             getFollowedPosts(loggedUser.uid, setPosts)
         } else {
             getAllPosts(setPosts)

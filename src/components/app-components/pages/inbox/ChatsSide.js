@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 // UI imports
-import { AppBar, Card, CardHeader, List, makeStyles, Toolbar, Typography } from '@material-ui/core'
+import { AppBar, Card, CardHeader, Grid, List, makeStyles, Toolbar, Typography } from '@material-ui/core'
 import ChatItem from './ChatItem'
 
 // Component imports
@@ -12,6 +12,9 @@ import { AuthedUser } from '../../../user-context/AuthedUserContext'
 
 // style staff
 const useStyles = makeStyles(theme => ({
+    gridItem: {
+        height: "calc(100vh - 100px)",
+    },
     card: {
         height: "100%",
         borderRight: `1px solid ${theme.palette.divider}`
@@ -60,17 +63,19 @@ function ChatsSide() {
     })
 
     return (
-        <div className={classes.card}>
-            <CardHeader
-                className={classes.headerInfo}
-                title={loggedUser?.username}
-                titleTypographyProps={{ className: classes.username, align: "center" }}
+        <Grid className={classes.gridItem} item xs={12} md={4}>
+            <div className={classes.card}>
+                <CardHeader
+                    className={classes.headerInfo}
+                    title={loggedUser?.username}
+                    titleTypographyProps={{ className: classes.username, align: "center" }}
 
-            />
-            <List className={classes.chatList}>
-                {mappedChats}
-            </List>
-        </div>
+                />
+                <List className={classes.chatList}>
+                    {mappedChats}
+                </List>
+            </div>
+        </Grid>
     )
 }
 

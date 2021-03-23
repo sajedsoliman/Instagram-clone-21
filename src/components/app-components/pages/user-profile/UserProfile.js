@@ -44,19 +44,16 @@ function UserProfile() {
             })
     }, [username])
 
+    if (user == null) return null
 
-    if (user == null) {
-        return null
-    } else {
-        return (
-            <div className={classes.pageWrapper}>
-                <Container maxWidth="md">
-                    <UserInfo user={user} />
-                    <UserMedia user={user} />
-                </Container>
-            </div>
-        )
-    }
+    return (
+        <div className={classes.pageWrapper}>
+            <Container maxWidth="md">
+                <UserInfo user={user} />
+                <UserMedia user={user} />
+            </Container>
+        </div>
+    )
 }
 
 export default UserProfile

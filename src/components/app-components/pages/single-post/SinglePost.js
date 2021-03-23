@@ -2,7 +2,7 @@ import { Container, Divider, makeStyles } from '@material-ui/core'
 import { useEffect, useState } from 'react'
 
 // Router imports - to get the post id from params
-import { useParams } from 'react-router-dom'
+import { Redirect, useParams } from 'react-router-dom'
 
 // component imports
 import Store from '../../../common-components/firebase/Store'
@@ -24,16 +24,17 @@ function SinglePost() {
     const { getPost } = Store()
 
     // State vars
-    const [post, setPost] = useState(null)
+    const [post, setPost] = useState("not exist")
 
 
     // fetch the post from server when the component renders
-    useEffect(() => {
-        getPost(userId, postId, setPost)
+    useEffect(async () => {
+        setPost(await getPost(userId, postId))
     }, [postId])
 
-    if (post == null) return null
+    if (post == undefined) return <Redirect push to="/" />
     else {
+        if (post == "not exist") return null
         return (
             <AppPage>
                 <Container maxWidth="md">
@@ -42,7 +43,10 @@ function SinglePost() {
 
                     <Divider />
                     {/* user other posts */}
-                    <UserSuggestedPosts userId={userId} activePostId={postId} postCreator={post.user.username} />
+                    <UserSuggestedPosts
+                        userId={userId}
+                        activePostId={postId}
+                        postCreator={post.user.username} />
                 </Container>
             </AppPage>
         )

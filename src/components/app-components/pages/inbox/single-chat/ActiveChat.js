@@ -3,10 +3,11 @@ import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
 // UI imports
-import { } from '@material-ui/core'
+import { Grid, makeStyles } from '@material-ui/core'
 
 // Contexts
 import { AuthedUser } from '../../../../user-context/AuthedUserContext'
+import { Layout } from '../../../../contexts/layout-context/LayoutContext'
 
 // Component imports
 import Store from '../../../../common-components/firebase/Store'
@@ -14,9 +15,22 @@ import ChatHeader from './ChatHeader'
 import ChatMessages from './ChatMessages'
 import ChatDetails from './ChatDetails'
 
-
 function ActiveChat() {
+    const layout = Layout()
+
+    // Styles
+    const useStyles = makeStyles(theme => ({
+        gridItem: {
+            height: `calc(100vh - ${layout.header.desktop.height}px - 34px)`,
+
+            [theme.breakpoints.down("sm")]: {
+                height: `calc(100vh - ${layout.header.mobile.height}px)`,
+            }
+        },
+    }))
+
     const loggedUser = AuthedUser()
+    const classes = useStyles()
 
     // State vars
     const [chat, setChat] = useState(null)
@@ -52,11 +66,11 @@ function ActiveChat() {
     const headerProps = {
         detailsOpen: details,
         toggleDetails: toggleDetailsHandler,
-        member: senToMember
+        member: senToMember,
     }
 
     return (
-        <>
+        <Grid className={classes.gridItem} item xs={12} md={8}>
             <ChatHeader {...headerProps} />
             {
                 details ? (
@@ -65,7 +79,7 @@ function ActiveChat() {
                     <ChatMessages senToMember={senToMember} chatId={chatId} userId={loggedUser.uid} />
                 )
             }
-        </>
+        </Grid>
     )
 }
 

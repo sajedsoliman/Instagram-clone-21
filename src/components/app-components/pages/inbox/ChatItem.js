@@ -20,9 +20,16 @@ const useStyles = makeStyles(theme => ({
         boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
     },
     chatAdditionalInfoTypo: {
-        "& span": {
+
+        "& > span": {
             display: "flex",
             alignItems: "center",
+            "& .text": {
+                display: "block",
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+                whiteSpace: "nowrap",
+            },
 
             "& .MuiSvgIcon-root": {
                 fontSize: ".35rem",
@@ -76,9 +83,9 @@ function ChatItem({ chat, authUserId, chatDocId }) {
         let res
         // check if you own the last message
         if (lastMsg.id == authUserId) {
-            res = <span>{text} <FiberManualRecord fontSize='small' /> You</span>
+            res = <span><span className="text">{text}</span> <FiberManualRecord fontSize='small' /> You</span>
         } else {
-            res = text
+            res = <span><span className="text">{text}</span></span>
         }
 
         return res
@@ -88,9 +95,7 @@ function ChatItem({ chat, authUserId, chatDocId }) {
         <ListItem button to={{
             pathname: `/direct/inbox/t/${chatDocId}`, ...(window.innerWidth < 960 ? {
                 state: {
-                    background: {
-                        pathname: location
-                    }
+                    mobile: true
                 }
             } : {})
         }} component={RouterLink}>

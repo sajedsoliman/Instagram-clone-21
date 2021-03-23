@@ -32,11 +32,12 @@ export function AuthedUserProvider({ children }) {
                     })
             } else {
                 // if the user has logged out -> remove them
-                setAuthUser(null)
+                setAuthUser("no user")
             }
         })
     }, [])
 
+    if (authUser == null) return null
     return (
         <AuthedUserContext.Provider value={authUser}>
             {children}

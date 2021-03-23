@@ -87,36 +87,31 @@ function UserSettings() {
         )
     }
 
-    if (loggedUser != null) {
-
-        return (
-            <AppPage>
-                <Container maxWidth="md">
-                    <Card variant="outlined" className={classes.settingsCard}>
-                        <Grid container className={classes.wrapper}>
-                            {/* Left Side setting options - like edit profile or password etc... */}
-                            <Grid item md={3} className={classes.tabsWrapper}>
-                                {/* Vertical taps */}
-                                <VerticalTabs tabs={tabs}
-                                    handleChangeTab={handleChangeTab}
-                                    currentTab={currentTab} />
-                            </Grid>
-
-                            {/* Right Side - edit form */}
-                            <Grid item xs={12} md={9}>
-                                <Container maxWidth="xs" className={classes.formContainer}>
-                                    {/* Render the current tab's form */}
-                                    {getTabPanelContent(0)}
-                                    {getTabPanelContent(1)}
-                                </Container>
-                            </Grid>
+    return (
+        <AppPage>
+            <Container maxWidth="md">
+                <Card variant="outlined" className={classes.settingsCard}>
+                    <Grid container className={classes.wrapper}>
+                        {/* Left Side setting options - like edit profile or password etc... */}
+                        <Grid item md={3} className={classes.tabsWrapper}>
+                            {/* Vertical taps */}
+                            <VerticalTabs tabs={tabs}
+                                handleChangeTab={handleChangeTab}
+                                currentTab={currentTab} />
                         </Grid>
-                    </Card>
-                </Container>
-            </AppPage>
-        )
-    } else {
-        return null
-    }
+
+                        {/* Right Side - edit form */}
+                        <Grid item xs={12} md={9}>
+                            <Container maxWidth="xs" className={classes.formContainer}>
+                                {/* Render the current tab's form */}
+                                {getTabPanelContent(0)}
+                                {getTabPanelContent(1)}
+                            </Container>
+                        </Grid>
+                    </Grid>
+                </Card>
+            </Container>
+        </AppPage>
+    )
 }
 export default UserSettings

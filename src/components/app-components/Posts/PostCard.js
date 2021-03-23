@@ -57,7 +57,7 @@ export default function PostCard({ post, docId }) {
 
     // handle modal Opening
     const handleModalOpen = () => {
-        if (LoggedUser) {
+        if (LoggedUser != "no user") {
             setPostActionsModal(prev => ({
                 ...prev, isOpen: !prev.isOpen
             }))

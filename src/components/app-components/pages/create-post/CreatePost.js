@@ -52,9 +52,6 @@ const initialInfo = {
 function CreatePost() {
     const classes = useStyles()
 
-    // Router
-    const history = useHistory()
-
     // contexts
     const processSettings = useAlert()
     const user = AuthedUser()
@@ -66,15 +63,6 @@ function CreatePost() {
 
     // import useForm in order to handle inputs
     const { values: postInfo, handleInputsChange } = useForm(initialInfo, false)
-
-    // useEffect to check if the user is exited or not on when user state changes
-    useEffect(() => {
-        // Check if the user is exist or not
-        if (!user) {
-            // If not exist go back to home page
-            history.replace("/")
-        }
-    }, [user])
 
     // handle upload a post
     useEffect(() => {
@@ -190,7 +178,7 @@ function CreatePost() {
         }
     }
 
-    if (user == null) return null
+    if (user == "no user") return null
     return (
         <AppPage>
             <Container>

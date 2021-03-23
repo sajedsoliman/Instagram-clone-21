@@ -9,6 +9,7 @@ import { List, makeStyles, Typography } from "@material-ui/core"
 // icons
 import { AddCircleOutline } from '@material-ui/icons'
 import clsx from "clsx"
+import { AuthedUser } from "../../user-context/AuthedUserContext"
 
 // style
 const useStyles = makeStyles(theme => ({
@@ -36,6 +37,7 @@ const useStyles = makeStyles(theme => ({
 
 function PostComments(props) {
     const classes = useStyles()
+    const loggedUser = AuthedUser()
     const commentsList = useRef()
 
     // destructuring though props
@@ -54,15 +56,25 @@ function PostComments(props) {
         commentsList.current.scrollTo({ top: commentsList.current.scrollHeight })
     }, [limit, comments])
 
+    // Other people comments
     const mappedComments = (fullScreen ? comments.slice(0, limit) : comments)
-        .map(({ text, commenter }, index) => {
-            return (
+        .map(({ text, commenter }, index) =>
+            (loggedUser == "no user" && commenter != loggedUser.fullName) && (
                 <PostComment
                     key={`${index}-${commenter}`}
                     text={text}
                     commenter={commenter} />
             )
-        })
+        )
+
+    // Logged user comment if any (user)
+    const loggedUserComments = comments
+        .map(({ text, commenter }, index) => (loggedUser != "no user" && commenter == loggedUser.fullName) && (
+            <PostComment
+                key={`${index}-${commenter}`}
+                text={text}
+                commenter={commenter} />
+        ))
 
     const borderStyles = {
         borderTop: "1px solid rgba(0,0,0,.1)",
@@ -74,7 +86,20 @@ function PostComments(props) {
             ref={commentsList}
             className={`${fullScreen ? classes.list : ""}`}
             {...(borders && { style: borderStyles })}>
-            {mappedComments}
+            {/* Logged user comments */}
+            {
+                loggedUser != "no user" && (
+                    <div>
+                        {/* If there is no user => will not show anything */}
+                        {loggedUserComments}
+                    </div>
+                )
+            }
+
+            {/* other comments */}
+            <div>
+                {mappedComments}
+            </div>
 
             {/* increase limit icons */}
             {

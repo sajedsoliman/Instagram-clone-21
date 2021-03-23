@@ -7,7 +7,7 @@ import { Card, Container, Grid, makeStyles } from '@material-ui/core'
 
 // Contexts
 import { AuthedUser } from '../../../user-context/AuthedUserContext'
-
+import { Layout } from '../../../contexts/layout-context/LayoutContext'
 
 // Component imports
 import AppPage from '../AppPage'
@@ -17,47 +17,40 @@ import SendMessageSide from './SendMessageSide'
 
 
 // style staff
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
     page: {
         paddingTop: 90
     },
-    gridItem: {
-        height: "87vh",
-    }
-})
+}))
 
 
 function Inbox() {
+    const layout = Layout()
     const classes = useStyles()
+
 
     // Router imports
     const { path } = useRouteMatch()
     const location = useLocation()
-    const background = location.state && location.state.background
-
 
     return (
         <AppPage additionalClass={classes.page}>
             <Container maxWidth="md">
                 <Card variant="outlined" className={classes.pageCard}>
-                    <Grid container>
+                    <Grid container className={classes.inboxGrid}>
 
                         {/* All chats side */}
-                        <Grid className={classes.gridItem} item xs={12} md={4}>
-                            <ChatsSide user />
-                        </Grid>
+                        <ChatsSide user />
 
                         {/* active (opened chat) - using another switch here (nesting system) */}
-                        <Grid className={classes.gridItem} item xs={12} md={8}>
-                            <Switch>
-                                <Route path={path} exact>
-                                    <SendMessageSide />
-                                </Route>
-                                <Route path={`${path}/t/:chatId`}>
-                                    <ActiveChat />
-                                </Route>
-                            </Switch>
-                        </Grid>
+                        <Switch>
+                            {/* <Route path={path} exact>
+                                <SendMessageSide />
+                            </Route> */}
+                            <Route path={`${path}/t/:chatId`}>
+                                <ActiveChat />
+                            </Route>
+                        </Switch>
                     </Grid>
                 </Card>
             </Container>

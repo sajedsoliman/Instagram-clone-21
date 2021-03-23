@@ -46,20 +46,6 @@ const useStyles = makeStyles(theme => ({
 export default function MainBody() {
     const user = AuthedUser()
 
-    /*     // import process settings (use Alert) for routes error messages
-        const processSettings = useAlert()
-    
-        const location = useLocation()
-        const routeErrorMsg = location.state && location.state.errorMsg
-    
-        // use Effect to see if we have any error in the location state
-        useEffect(() => {
-            console.log(location.state)
-            if (routeErrorMsg) {
-                processSettings("error", routeErrorMsg)
-            }
-        }, [location]) */
-
     const classes = useStyles()
     return (
         <div className={classes.appBody}>
@@ -73,13 +59,13 @@ export default function MainBody() {
                     {/* Right-side (Some Info & Suggestions) */}
                     <Grid item xs={12} md={5}>
                         {
-                            user && <SideBar />
+                            user != "no user" && <SideBar />
                         }
                     </Grid>
                 </Grid>
 
                 {/* Add post button for desktop */}
-                {user && (
+                {user != "no user" && (
                     <>
                         <Fab
                             className={classes.addPostBtn}

@@ -48,23 +48,26 @@ function PostLikes(props) {
     // set an event listener for likes only!
     // docId as a dep => to change the listener(onSnapshot) every time the post changes
     useEffect(() => {
-        db.collection("posts").doc(user.id)
+        db
+            .collection("posts")
+            .doc(user.id)
             .collection("user_posts")
             .doc(docId)
             .onSnapshot(snapshot => {
                 // The question mark is because I put a listener on likes not on the post as whole
-                setLikers(snapshot.data()?.likedBy)
+                // (|| []) => as you see here it's a listener so when a user delete a post it's gonna fire here with undefined 
+                setLikers(snapshot.data()?.likedBy || [])
             })
     }, [docId])
 
     // This check because of the listener above in the useEffect
     // check if the user has liked this post
-    const likerObj = likers.find(liker => liker.id == loggedUser?.uid)
+    const likerObj = likers.find(liker => liker.id == loggedUser.uid)
     const isLiked = Boolean(likerObj)
 
     // handling like ability
     const handleToggleLike = () => {
-        if (loggedUser != undefined) {
+        if (loggedUser != "no user") {
             const newLiker = { liker: loggedUser.fullName, id: loggedUser.uid }
             db.collection("posts")
                 .doc(user.id)

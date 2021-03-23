@@ -22,28 +22,25 @@ function FullScreenPostModal() {
 
     // router
     const history = useHistory()
-    const location = useLocation()
     const { userId, postId } = useParams()
 
     // State vars
     const [modalOpen, setModalOpen] = useState({ title: "", isOpen: true })
     const [post, setPost] = useState(null)
 
-    // Handle followers modal open
+    // Handle fullscreen modal open
     const handleModalOpen = () => {
         // go back in history - to reset modal open state
         history.goBack()
         setModalOpen(prev => ({ ...prev, isOpen: !prev.isOpen }))
-
-
     }
 
     // Import single post function from store
     const { getPost } = Store()
 
     // Fetch the post from database
-    useEffect(() => {
-        getPost(userId, postId, setPost)
+    useEffect(async () => {
+        setPost(await getPost(userId, postId))
     }, [postId])
 
     // popup props

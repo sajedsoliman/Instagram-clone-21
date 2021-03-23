@@ -43,7 +43,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Header({ handleLogout }) {
     const classes = useStyles()
-    const user = AuthedUser()
 
     // Refs
     const searchInput = useRef()

@@ -1,4 +1,4 @@
-import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom'
 import { useState } from "react"
 
 // Material-UI imports
@@ -15,6 +15,7 @@ function PostSettingsList(props) {
 
     // Router imports
     const location = useLocation()
+    const history = useHistory()
     const background = location.state && location.state.background
 
     // destructuring props
@@ -29,25 +30,25 @@ function PostSettingsList(props) {
     // handle delete post
     const handleDeletePost = () => {
         deletePost(postId, postCreator.id, onSuccessDelete)
+    }
 
-        // A callback to get fired when the post is deleted
-        function onSuccessDelete() {
-            // Get where the user
-            const currentPage = window.location.pathname;
+    // A callback to get fired when the post is deleted
+    function onSuccessDelete() {
+        // Get where the user
+        const currentPage = window.location.pathname;
 
-            // do different action according to the current page
-            switch (currentPage) {
-                case "/":
-                    window.location.reload()
-                    break;
-                default:
-                    window.location.href = `/${postCreator.username}`
-                    break;
-            }
-
-            // Handle close confirm dialog after delete the post
-            handleConfirmDeleteModalOpen()
+        // do different action according to the current page
+        switch (currentPage) {
+            case "/":
+                window.location.reload()
+                break;
+            default:
+                history.push(`/${postCreator.username}`)
+                break;
         }
+
+        // Handle close confirm dialog after delete the post
+        handleConfirmDeleteModalOpen()
     }
 
     // Handle close confirm dialog
