@@ -76,7 +76,7 @@ function ActiveChat() {
                 details ? (
                     <ChatDetails senToMember={senToMember} chatId={chatId} chat={chat} />
                 ) : (
-                    <ChatMessages senToMember={senToMember} chatId={chatId} userId={loggedUser.uid} />
+                    <ChatMessages chat={chat} senToMember={senToMember} chatId={chatId} userId={loggedUser.uid} />
                 )
             }
         </Grid>

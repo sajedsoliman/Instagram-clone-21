@@ -1,5 +1,4 @@
-import { useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 // Component imports
 import Posts from "./Posts/Posts"
@@ -7,7 +6,6 @@ import MobileBottomBar from './MobileBottomBar';
 import SideBar from './side-bar/SideBar';
 
 // Contexts
-import { useAlert } from '../notification-context/NotificationContext';
 import { AuthedUser } from '../user-context/AuthedUserContext';
 
 // Material-UI imports
@@ -59,13 +57,13 @@ export default function MainBody() {
                     {/* Right-side (Some Info & Suggestions) */}
                     <Grid item xs={12} md={5}>
                         {
-                            user != "no user" && <SideBar />
+                            user !== "no user" && <SideBar />
                         }
                     </Grid>
                 </Grid>
 
                 {/* Add post button for desktop */}
-                {user != "no user" && (
+                {user !== "no user" && (
                     <>
                         <Fab
                             className={classes.addPostBtn}

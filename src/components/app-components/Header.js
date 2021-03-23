@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 // material-ui imports
 import { makeStyles } from "@material-ui/core"
@@ -13,14 +13,7 @@ import Nav from '../common-components/header/Nav'
 import PopUp from "../common-components/PopUp"
 import LoginForm from './forms/LoginForm'
 import RegisterForm from "./forms/RegisterForm"
-import { AuthedUser } from "../user-context/AuthedUserContext"
 import SearchResults from "./SearchResults"
-
-// Algolia imports
-import algoliasearch from 'algoliasearch/lite';
-import {
-    SearchBox,
-} from 'react-instantsearch-dom';
 
 // styles
 const useStyles = makeStyles((theme) => ({
@@ -41,7 +34,7 @@ const useStyles = makeStyles((theme) => ({
     }
 }))
 
-export default function Header({ handleLogout }) {
+export default function Header(props) {
     const classes = useStyles()
 
     // Refs

@@ -1,13 +1,14 @@
 import { useHistory, useLocation } from 'react-router-dom'
 
-
 // material-ui imports
 import { Button, makeStyles } from "@material-ui/core"
 
 // component imports
-import { useForm, Form } from "../../common-components/useForm"
+import { useForm } from "../../common-components/useForm"
+import UserForm from "../../common-components/user-related/UserForm"
+
+// Service
 import { auth, firebase } from '../../common-components/firebase/database'
-import UserForm from "../../common-components/UserForm"
 import { validation } from "./functions"
 import { userInitialValues } from '../serviceInfo'
 

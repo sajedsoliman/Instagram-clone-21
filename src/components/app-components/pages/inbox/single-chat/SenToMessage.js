@@ -41,20 +41,27 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-function SenToMessage({ messageBody, senToUser, msgOptions }) {
+function SenToMessage({ message, senToUser, msgOptions, lastMsg, messages, msgIndex }) {
     const classes = useStyles()
+
+    // Implement avatar show
+    const showAvatar =
+        ((lastMsg.id == senToUser.id) && message.body == lastMsg.text)
+        || (messages[msgIndex + 1]?.message.senderId != senToUser.id)
 
     return (
         <div className={classes.wrapper}>
             <Typography className={`${classes.message} chat-message`}>
-                {messageBody}
+                {message.body}
+                {/* Option icon */}
                 {
                     msgOptions &&
                     <MoreHoriz className={classes.optionsIcon} />
                 }
             </Typography>
-            {/* Option icon */}
-            <Avatar className={classes.avatar} src={senToUser.avatar} />
+            {
+                showAvatar ? <Avatar className={classes.avatar} src={senToUser.avatar} /> : null
+            }
         </div>
 
     )

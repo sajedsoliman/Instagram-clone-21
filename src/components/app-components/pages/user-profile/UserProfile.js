@@ -37,7 +37,7 @@ function UserProfile() {
                 const user = value.empty
                 // check if the user is existed or not
                 if (user) {
-                    history.replace("/user/not-found")
+                    history.replace("/users/not-found")
                 } else {
                     setUser({ ...value.docs[0].data(), id: value.docs[0].id })
                 }

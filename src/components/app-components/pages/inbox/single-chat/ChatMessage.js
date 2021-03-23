@@ -18,12 +18,12 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-function ChatMessage({ message, senToUser }) {
+function ChatMessage({ message, senToUser, chat, messages, msgIndex }) {
     const loggedUser = AuthedUser()
     const classes = useStyles()
 
     // State var
-    const [msgOptions, setMsgOptions] = useState(true)
+    const [msgOptions, setMsgOptions] = useState(false)
 
     // handle show msg options icon
     const handleMsgOptionsShow = () => {
@@ -46,7 +46,7 @@ function ChatMessage({ message, senToUser }) {
                     isYours ? (
                         <LoggedUserMessage msgOptions={msgOptions} messageBody={message.body} />
                     ) : (
-                        <SenToMessage msgOptions={msgOptions} senToUser={senToUser} messageBody={message.body} />
+                        <SenToMessage messages={messages} msgIndex={msgIndex} lastMsg={chat.lastMsg} msgOptions={msgOptions} senToUser={senToUser} message={message} />
                     )
                 }
             </div>

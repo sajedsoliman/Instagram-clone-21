@@ -47,6 +47,7 @@ export default function App() {
                                 <Switch location={background || location}>
                                     {/* App body */}
                                     <Route path="/" exact children={<MainBody />} />
+
                                     <Route path="/home" children={<MainBody />} />
 
                                     {/* upload a post to database page (create a post) */}
@@ -65,6 +66,20 @@ export default function App() {
                                         <SignUp />
                                     </UnAuthRoute>
 
+                                    {/* User followers page - popup in desktops and full list in mobiles */}
+                                    <Route path="/:userId/followers" exact render={() => {
+                                        return (
+                                            <UserFollowers />
+                                        )
+                                    }} />
+
+                                    {/* User's following users page - full list in mobiles */}
+                                    <Route path="/:userId/following" render={() => {
+                                        return (
+                                            <UserFollowing />
+                                        )
+                                    }} />
+
                                     {/* User inbox page - authed */}
                                     <AuthRoute path="/direct/inbox">
                                         <Inbox />
@@ -80,30 +95,23 @@ export default function App() {
                                         <UserSettings />
                                     </AuthRoute>
 
-
                                     {/* User profile page */}
-                                    <Route path="/:username" render={(props) => (
+                                    <Route path="/:username" exact render={(props) => (
                                         <UserProfile />
                                     )} />
 
-                                    {/* User followers page - popup in desktops and full list in mobiles */}
-                                    <Route path="/:userId/followers" exact render={() => {
-                                        return (
-                                            <UserFollowers />
-                                        )
-                                    }} />
-
-                                    {/* User's following users page - full list in mobiles */}
-                                    <Route path="/:userId/following" exact render={() => {
-                                        return (
-                                            <UserFollowing />
-                                        )
-                                    }} />
-
                                     {/* 404 page & route */}
-                                    <Route path="*" render={(props) => (
+                                    <Route render={(props) => (
                                         <NotFound />
                                     )} />
+
+                                    {/* 404 page & route */}
+                                    {/* <Route path="/not-found" render={(props) => (
+                                        <NotFound />
+                                    )} /> */}
+
+
+
                                 </Switch>
                             }
 

@@ -57,19 +57,20 @@ function PostComments(props) {
     }, [limit, comments])
 
     // Other people comments
-    const mappedComments = (fullScreen ? comments.slice(0, limit) : comments)
-        .map(({ text, commenter }, index) =>
-            (loggedUser == "no user" && commenter != loggedUser.fullName) && (
-                <PostComment
-                    key={`${index}-${commenter}`}
-                    text={text}
-                    commenter={commenter} />
-            )
+    const filteredComments = comments.filter(comment => comment.commenter !== loggedUser.fullName)
+    const mappedComments = (fullScreen ? filteredComments.slice(0, limit) : filteredComments)
+        .map(({ text, commenter }, index) => (
+            <PostComment
+                key={`${index}-${commenter}`}
+                text={text}
+                commenter={commenter} />
+        )
         )
 
     // Logged user comment if any (user)
     const loggedUserComments = comments
-        .map(({ text, commenter }, index) => (loggedUser != "no user" && commenter == loggedUser.fullName) && (
+        .filter(comment => comment.commenter == loggedUser.fullName)
+        .map(({ text, commenter }, index) => (
             <PostComment
                 key={`${index}-${commenter}`}
                 text={text}
@@ -106,7 +107,7 @@ function PostComments(props) {
                 fullScreen && (
                     comments.length > 0 ?
                         (
-                            limit < comments.length && <AddCircleOutline className={classes.increaseLimitIcon} onClick={handleLimit} />
+                            limit < (comments.length - loggedUserComments.length) && <AddCircleOutline className={classes.increaseLimitIcon} onClick={handleLimit} />
                         )
                         : (
                             <Typography variant="body2">No comments to show</Typography>

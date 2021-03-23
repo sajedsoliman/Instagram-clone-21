@@ -4,12 +4,16 @@ import { useState } from "react"
 import { makeStyles } from "@material-ui/core"
 
 // component imports
-import { useForm } from "../../common-components/useForm"
+import UserForm from "../../common-components/user-related/UserForm"
 import Store from "../../common-components/firebase/Store"
-import UserForm from "../../common-components/UserForm"
-import { auth, db, storage } from '../../common-components/firebase/database'
-import { userInitialValues } from "../serviceInfo"
+
+// Hooks
+import { useForm } from "../../common-components/useForm"
+
+// service
 import { validation } from "./functions"
+import { userInitialValues } from "../serviceInfo"
+import { storage } from '../../common-components/firebase/database'
 
 // styles
 const useStyles = makeStyles((theme) => ({
@@ -17,9 +21,6 @@ const useStyles = makeStyles((theme) => ({
 
 function RegisterForm({ handleCloseModal }) {
     const classes = useStyles()
-
-    // State vars
-
 
     // import useForm things
     const {

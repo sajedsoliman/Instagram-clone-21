@@ -167,6 +167,19 @@ function Store() {
             .then(snapshot => snapshot.data())
     }
 
+    // Get post comments
+    const getPostComments = (postId, userId, setComments) => {
+        db.collection("posts")
+            .doc(userId)
+            .collection("user_posts")
+            .doc(postId)
+            .collection("post_comments")
+            .onSnapshot(snapshot => {
+                setComments(snapshot.docs.map(doc => ({ ...doc.data() })))
+            })
+    }
+
+
     // get user followers
     const getUserFollowers = (userId, setFollowers) => {
         db
@@ -570,6 +583,7 @@ function Store() {
         toggleChatMute,
         createChat,
         deleteChat,
+        getPostComments,
         loading,
     }
 }

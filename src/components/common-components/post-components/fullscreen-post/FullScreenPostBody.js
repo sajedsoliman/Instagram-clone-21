@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 // Material-UI imports
 
-import { Card, CardContent, Grid, makeStyles } from '@material-ui/core'
+import { Card, CardContent, makeStyles } from '@material-ui/core'
 
 // component import
 import PopUp from '../../PopUp'
@@ -11,6 +11,7 @@ import PostCaption from '../PostCaption'
 import PostComments from '../PostComments'
 import FullscreenPostActions from './FullscreenPostActions'
 import { db } from '../../firebase/database'
+import Store from '../../firebase/Store'
 
 // styles
 const useStyles = makeStyles(theme => ({
@@ -39,14 +40,13 @@ function FullScreenPostBody(props) {
     const [comments, setComments] = useState([])
     const [settingsModal, setSettingsModal] = useState({ title: "", isOpen: false })
 
+    // Import Store component to get comments
+    const { getPostComments } = Store()
+
     // Fetch post comment from database
     useEffect(() => {
-        db.collection("posts").doc(user.id)
-            .collection("user_posts").doc(postId)
-            .collection("post_comments").onSnapshot(snapshot => {
-                setComments(snapshot.docs.map(doc => ({ ...doc.data() })))
-            })
-    }, [])
+        getPostComments(postId, user.id, setComments)
+    }, [postId])
 
     // handle open settings list modal
     const handleModalOpen = () => {

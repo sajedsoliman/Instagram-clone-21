@@ -1,13 +1,13 @@
-import { useState } from "react"
-
 // material-ui imports
-import { Button, CircularProgress, Grid, Link, makeStyles, Typography } from "@material-ui/core"
+import { Button, CircularProgress, Grid, makeStyles, Typography } from "@material-ui/core"
 
 // component imports
-import Controls from "../common-components/controls/Controls"
-import { useAlert } from "../notification-context/NotificationContext"
-import { Form } from "./useForm"
-import { auth } from "../common-components/firebase/database"
+import Controls from "../controls/Controls"
+import { auth } from "../firebase/database"
+import { Form } from "../useForm"
+
+// Contexts
+import { useAlert } from "../../notification-context/NotificationContext"
 
 
 // styles

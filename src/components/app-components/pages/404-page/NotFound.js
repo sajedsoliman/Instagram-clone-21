@@ -15,6 +15,8 @@ const useStyles = makeStyles({
 function NotFound() {
     const classes = useStyles()
 
+    console.log("here")
+
     return (
         <AppPage>
             {/* title */}

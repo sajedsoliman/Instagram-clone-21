@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-function ChatMessages({ chatId, userId, senToMember }) {
+function ChatMessages({ chatId, userId, senToMember, chat }) {
     const classes = useStyles()
 
     // Ref
@@ -64,9 +64,12 @@ function ChatMessages({ chatId, userId, senToMember }) {
     }, [chatId])
 
     // map through messages
-    const mappedMessages = messages.map(msg => {
+    const mappedMessages = messages.map((msg, index) => {
+        // provide message as a prop to handle senToUser avatar visibility
+        // also provide the index of the current message to check each message's following message
+        // go to senToMessage for more clarifying
         const { id, message } = msg
-        return <ChatMessage key={id} message={message} senToUser={senToMember} />
+        return <ChatMessage chat={chat} msgIndex={index} messages={messages} key={id} message={message} senToUser={senToMember} />
     })
 
     // add message form props
