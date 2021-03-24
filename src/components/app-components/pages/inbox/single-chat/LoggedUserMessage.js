@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-function LoggedUserMessage({ messageBody, msgOptions }) {
+function LoggedUserMessage({ messageBody, msgOptions, msgSeen }) {
     const classes = useStyles()
 
     return (

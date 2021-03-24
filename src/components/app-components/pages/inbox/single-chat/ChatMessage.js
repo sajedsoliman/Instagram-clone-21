@@ -44,7 +44,7 @@ function ChatMessage({ message, senToUser, chat, messages, msgIndex }) {
                 onMouseOver={handleMsgOptionsShow}>
                 {
                     isYours ? (
-                        <LoggedUserMessage msgOptions={msgOptions} messageBody={message.body} />
+                        <LoggedUserMessage msgSeen={chat.lastMsgSeen} msgOptions={msgOptions} messageBody={message.body} />
                     ) : (
                         <SenToMessage messages={messages} msgIndex={msgIndex} lastMsg={chat.lastMsg} msgOptions={msgOptions} senToUser={senToUser} message={message} />
                     )

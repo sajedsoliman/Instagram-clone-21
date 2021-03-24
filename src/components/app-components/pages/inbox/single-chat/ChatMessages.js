@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 // UI imports
-import { CardContent, Container, List, makeStyles } from '@material-ui/core'
+import { CardContent, Container, List, makeStyles, Typography } from '@material-ui/core'
 
 // Contexts
 
@@ -33,6 +33,9 @@ const useStyles = makeStyles(theme => ({
         }
     },
     messagesList: {
+    },
+    msgSeen: {
+        cursor: "default"
     }
 }))
 
@@ -87,6 +90,11 @@ function ChatMessages({ chatId, userId, senToMember, chat }) {
                 <List className={classes.messagesList}>
                     {mappedMessages}
                 </List>
+                {chat.lastMsg.id == userId && (
+                    <Typography variant="caption" component='div' align="right" className={classes.msgSeen}>
+                        {chat.lastMsgSeen ? "seen" : "sent"}
+                    </Typography>
+                )}
             </CardContent>
 
             {/* add message form */}

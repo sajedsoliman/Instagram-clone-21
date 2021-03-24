@@ -322,7 +322,20 @@ function Store() {
             .doc(userId)
             .collection("chats")
             .doc(chatId)
-            .onSnapshot(snapshot => setChat(snapshot.exists ? { ...snapshot.data() } : null))
+            .onSnapshot(snapshot => {
+                if (window.location.pathname != `/direct/inbox/t/${chatId}`) return
+
+                setChat(snapshot.exists ? { ...snapshot.data() } : null)
+                const senToUser = snapshot.data().members.find(member => member.id != userId)
+
+                db.collection("members")
+                    .doc(senToUser.id)
+                    .collection("chats")
+                    .doc(chatId)
+                    .update({
+                        lastMsgSeen: true
+                    })
+            })
     }
 
     // handle putting a listener on a user's chat messages
@@ -374,12 +387,22 @@ function Store() {
         }
 
         // handle add the message to loggedUser chat
-        db.collection("members")
+        // handle the chat's last msg seen
+        db
+            .collection("members")
             .doc(loggedUserId)
             .collection("chats")
             .doc(chatId)
-            .collection("messages")
-            .add(messageObj)
+            .update({
+                lastMsgSeen: false
+            }).then(success => {
+                db.collection("members")
+                    .doc(loggedUserId)
+                    .collection("chats")
+                    .doc(chatId)
+                    .collection("messages")
+                    .add(messageObj)
+            })
 
         // handle add the message to SenTo chat
         db.collection("members")
@@ -483,6 +506,7 @@ function Store() {
         const chatObj = {
             isMuted: false,
             lastMsg: {},
+            lastMsgSeen: false,
             members: [
                 {
                     id: loggedUser.id,
@@ -566,6 +590,20 @@ function Store() {
             .then(snapshot => console.log(snapshot.empty)) */
     }
 
+    // handleLastMsgSeen
+    const handleLastMsgSeen = (chatId) => {
+        db.collection("members")
+            .doc(loggedUser.id)
+            .collection("chats")
+            .doc(chatId)
+            .get()
+            .then(snapshot => {
+                const senToUser = snapshot.data().members.find(member => member.id != loggedUser.id)
+
+            })
+    }
+
+
     return {
         posts,
         getSuggestedPosts,
@@ -592,6 +630,7 @@ function Store() {
         createChat,
         deleteChat,
         getPostComments,
+        handleLastMsgSeen,
         loading,
     }
 }

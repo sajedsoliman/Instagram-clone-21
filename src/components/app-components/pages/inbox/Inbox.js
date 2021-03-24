@@ -40,7 +40,7 @@ function Inbox() {
                     <Grid container className={classes.inboxGrid}>
 
                         {/* All chats side */}
-                        <ChatsSide user />
+                        <ChatsSide />
 
                         {/* active (opened chat) - using another switch here (nesting system) */}
                         <Switch>

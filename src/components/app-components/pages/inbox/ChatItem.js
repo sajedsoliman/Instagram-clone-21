@@ -92,13 +92,14 @@ function ChatItem({ chat, authUserId, chatDocId }) {
     }
 
     return (
-        <ListItem button to={{
-            pathname: `/direct/inbox/t/${chatDocId}`, ...(window.innerWidth < 960 ? {
-                state: {
-                    mobile: true
-                }
-            } : {})
-        }} component={RouterLink}>
+        <ListItem
+            button to={{
+                pathname: `/direct/inbox/t/${chatDocId}`, ...(window.innerWidth < 960 ? {
+                    state: {
+                        mobile: true
+                    }
+                } : {})
+            }} component={RouterLink}>
             <ListItemAvatar>
                 <Badge {...badgeProps}>
                     <Avatar src={senToMember.avatar} />

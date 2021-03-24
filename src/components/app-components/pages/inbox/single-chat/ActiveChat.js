@@ -41,6 +41,7 @@ function ActiveChat() {
     // State vars
     const [details, setDetails] = useState(false)
 
+
     // handel toggle chat details
     const toggleDetailsHandler = () => {
         setDetails(!details)
@@ -60,7 +61,8 @@ function ActiveChat() {
     if (chat == null) return null
 
     // Get some info
-    const senToMember = chat.members.find(member => member.id != loggedUser.uid)
+    const senToMember = chat?.members.find(member => member.id != loggedUser.uid)
+
 
     // Chat header props
     const headerProps = {
