@@ -62,13 +62,6 @@ function RegisterForm({ handleCloseModal }) {
             if (typeof (handleCloseModal) == "function") {
                 handleCloseModal()
             }
-
-            // stop loading
-            setLoading(false)
-            return authUser.user.updateProfile({
-                displayName: user.fullName,
-                photoURL: avatarUrl,
-            })
         }
     }
 

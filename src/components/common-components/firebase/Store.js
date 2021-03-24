@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 // Firebase imports
-import { db, auth, storage, firebase } from "./database";
+import { db, auth, storage, firebase, admin } from "./database";
 
 // component imports
 import { useAlert } from "../../notification-context/NotificationContext";
@@ -62,38 +62,48 @@ function Store() {
     // handle sign up user
     const signUpUserWithEmail = async (user, avatarUrl, callback) => {
         // Destructuring the user
-        const { email, username, password } = user
+        const { email, username, password, fullName } = user
 
-        // Check if the username isExisted or not
-        const available = await isUsernameExisted(username)
+        // Check if the username isExisted or not - await => cuz that's a promise
+        const available = Boolean(await isUsernameExisted(username))
 
         // if the username is vacant (available)
         if (available) {
+            // add the user to algolia then take the id and put it in the database
             const createdUser = auth.createUserWithEmailAndPassword(email, password)
 
-            // Add the user to database before auth them
-            AddUserToDB(user, (await createdUser).user.uid, avatarUrl)
+            // add to database
+            AddUserToDB(user, await (await createdUser).user.uid, avatarUrl)
 
 
-            // add the user to algolia
+            // add to algolia
             addToAlgolia(user, avatarUrl)
 
-            // loading before the auth state changes
-            setLoading(true)
-
             // timeout to wait for the user adding to db
-            setTimeout(() => {
-                createdUser.then(callback)
-                    .catch(err => processSettings("error", err.message))
+            createdUser.then((authUser) => {
+                // callback
+                callback()
+
+                // stop loading
+                setLoading(false)
+
+                // Save info to user profile
+                return authUser.user.updateProfile({
+                    photoURL: avatarUrl,
+                    displayName: fullName
+                })
             })
+                .catch(err => processSettings("error", err.message))
         }
     }
+
 
     // handle add the user to database
     const AddUserToDB = (user, id, avatarUrl) => {
         const { email, username, fullName } = user
 
-        db.collection("members")
+        db
+            .collection("members")
             .doc(id)
             .set({
                 email,
@@ -102,9 +112,7 @@ function Store() {
                 bio: "",
                 website: "",
                 id,
-                avatar: avatarUrl
-            }).then(_ => {
-                setLoading(false)
+                avatar: avatarUrl,
             })
     }
 
@@ -124,12 +132,13 @@ function Store() {
 
     // Check if the username is existed or not
     const isUsernameExisted = (username) => {
-        const isExisted = db.collection("members")
+        const isAvailable = db
+            .collection("members")
             .where("username", "==", username)
             .get()
             .then(user => user.empty ? true : processSettings("error", "username is already existed"))
 
-        return isExisted
+        return isAvailable
     }
 
     // Update user
@@ -477,10 +486,9 @@ function Store() {
             members: [
                 {
                     id: loggedUser.id,
-
                 },
                 {
-                    id: senToUser.uid,
+                    id: senToUser.id,
                     username: senToUser.username,
                     avatar: senToUser.avatar
                 }

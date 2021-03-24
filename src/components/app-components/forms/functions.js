@@ -19,7 +19,7 @@ const validation = (firedInput, setErrors) => {
         errors.password = valCond(passwordRegex.test(firedInput.password), "Password isn't strong")
     }
     if ("website" in firedInput) {
-        errors.website = valCond(webUrlRegex.test(firedInput.website), "Url is bad formatted")
+        errors.website = valCond(firedInput.website == "" || webUrlRegex.test(firedInput.website), "Url is bad formatted")
     }
 
     setErrors(errors)

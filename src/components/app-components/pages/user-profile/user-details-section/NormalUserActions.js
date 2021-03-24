@@ -46,19 +46,15 @@ function NormalUserActions({ user }) {
     const isFollowed = Boolean(followerObj)
 
     // Render the app actions depending on followed or not
-    let actions
-    if (isFollowed) {
-        actions = (
-            <FollowedUserActions user={user} />
-        )
-    } else {
-        actions = (
-            <CommonButton
-                onClick={followUserHandler}
-                text="Follow"
-                variant="contained" />
-        )
-    }
+    let actions = (
+        <CommonButton
+            onClick={followUserHandler}
+            text="Follow"
+            variant="contained" />
+    )
+
+    if (isFollowed)
+        actions = (<FollowedUserActions user={user} />)
 
     return actions
 }

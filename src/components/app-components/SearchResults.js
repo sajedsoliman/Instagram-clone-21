@@ -19,7 +19,7 @@ function SearchResults(props) {
     const classes = useStyles()
 
     // Destructuring props
-    const { anchorEl, searchText } = props
+    const { anchorEl, searchText, resetSearch } = props
 
     // State vars
     const [open, setOpen] = useState(false)
@@ -45,6 +45,7 @@ function SearchResults(props) {
 
     // close search menu handler
     const handleClose = () => {
+        resetSearch()
         setOpen(false)
     }
 

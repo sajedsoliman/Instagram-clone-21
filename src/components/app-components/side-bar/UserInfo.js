@@ -17,7 +17,9 @@ const useStyles = makeStyles(theme => ({
 
 function UserInfo() {
     const classes = useStyles()
-    const { avatar, fullName, username } = AuthedUser()
+    const loggedUser = AuthedUser()
+
+    const { avatar, fullName, username } = loggedUser
 
     return (
         <Box display="flex" alignItems="center" flexDirection="row" height="100%">

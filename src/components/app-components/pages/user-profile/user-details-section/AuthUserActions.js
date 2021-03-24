@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
     },
     dialogContent: {
         padding: "0 !important",
-        width: 400,
+        minWidth: 280
     }
 }))
 

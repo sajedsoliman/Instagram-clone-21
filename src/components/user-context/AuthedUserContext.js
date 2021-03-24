@@ -15,21 +15,39 @@ export function AuthedUserProvider({ children }) {
     useEffect(() => {
         auth.onAuthStateChanged(authedUser => {
             if (authedUser) {
+                // Destructuring the authed user
+
                 // update user's active state to true
                 db.collection("members")
                     .doc(authedUser.uid)
-                    .update({
-                        active: true
-                    }).then(success => {
-                        // get user info from database
-                        db.collection("members")
-                            .doc(authedUser.uid)
-                            .get()
-                            .then(savedUser => {
-                                const fetchedUser = savedUser.data()
+                    .get()
+                    .then(userDoc => {
+                        if (userDoc.exists) {
+                            userDoc.ref.update({
+                                active: true
+                            }).then(_ => {
+                                const fetchedUser = userDoc.data()
+                                // setAuthUser({ ...fetchedUser, uid: authedUser.uid })
                                 setAuthUser({ ...fetchedUser, uid: authedUser.uid })
+
                             })
+                        } else {
+                            window.location.reload()
+                        }
                     })
+                /* .update({
+                    active: true
+                }).then(success => {
+                    // get user info from database
+                    db.collection("members")
+                        .doc(authedUser.uid)
+                        .get()
+                        .then(savedUser => {
+                            const fetchedUser = savedUser.data()
+                            // setAuthUser({ ...fetchedUser, uid: authedUser.uid })
+                            setAuthUser({ ...fetchedUser, uid: authedUser.uid })
+                        })
+                }).catch(err => alert(err.message)) */
             } else {
                 // if the user has logged out -> remove them
                 setAuthUser("no user")

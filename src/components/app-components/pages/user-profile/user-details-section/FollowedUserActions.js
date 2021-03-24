@@ -12,6 +12,9 @@ import PersonAddDisabled from '@material-ui/icons/PersonAddDisabled';
 import UnFollowModal from '../../../../common-components/user-related/UnFollowModal';
 import Store from '../../../../common-components/firebase/Store';
 
+// Hooks
+import useWindowWidth from '../../../../common-components/hooks/useWindowWidth';
+
 
 // styles
 const useStyles = makeStyles(theme => ({
@@ -53,11 +56,15 @@ function FollowedUserActions({ user }) {
     // Import Store component to create a new chat and some checks
     const { createChat } = Store()
 
+    // Import window Width custom hook
+    const { windowWidth } = useWindowWidth()
+
+
     // handle click message btn
     const HandleCreateChat = async () => {
         // Check if the user has a chat with the user in this profile
         // go to the chat id (either it's now or already exists)
-        history.replace(`direct/inbox/t/${await createChat(user)}`)
+        history.push(`direct/inbox/t/${await createChat(user)}`, (windowWidth < 960 ? { mobile: true } : {}))
 
     }
 

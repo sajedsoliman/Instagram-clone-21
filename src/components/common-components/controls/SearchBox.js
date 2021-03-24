@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 export default function SearchBox(props) {
-    const { value, handleChange, inputRef } = props
+    const { value, handleChange, inputRef, ...others } = props
     const classes = useStyles()
 
     // component prop objects
@@ -33,6 +33,6 @@ export default function SearchBox(props) {
     }
 
     return (
-        <TextField  {...inputProps} />
+        <TextField  {...inputProps} {...others} />
     )
 }

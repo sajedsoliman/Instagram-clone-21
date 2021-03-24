@@ -78,7 +78,7 @@ export default function Header(props) {
     const searchInputProps = {
         value: searchValue,
         inputRef: searchInput,
-        handleChange: handleChangeSearch
+        handleChange: handleChangeSearch,
     }
 
     return (
@@ -91,7 +91,7 @@ export default function Header(props) {
                         </Grid>
                         <Grid className={classes.searchContainer} item sm={5}>
                             <Controls.SearchBox {...searchInputProps} />
-                            <SearchResults anchorEl={searchInput} searchText={searchValue} />
+                            <SearchResults resetSearch={() => setSearchValue("")} anchorEl={searchInput} searchText={searchValue} />
                         </Grid>
                         <Grid item xs={8} sm={5}>
                             <Nav

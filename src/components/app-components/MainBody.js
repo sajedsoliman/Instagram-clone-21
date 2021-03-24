@@ -57,13 +57,13 @@ export default function MainBody() {
                     {/* Right-side (Some Info & Suggestions) */}
                     <Grid item xs={12} md={5}>
                         {
-                            user !== "no user" && <SideBar />
+                            user !== "no user" ? <SideBar /> : null
                         }
                     </Grid>
                 </Grid>
 
                 {/* Add post button for desktop */}
-                {user !== "no user" && (
+                {user != "no user" && (
                     <>
                         <Fab
                             className={classes.addPostBtn}

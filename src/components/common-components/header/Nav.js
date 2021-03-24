@@ -114,7 +114,7 @@ export default function Nav({ handleLoginModalOpen, handleRegisterModalOpen }) {
             </Link>
 
             {
-                user != 'no user' ?
+                user !== "no user" ?
                     <div className={classes.secondaryLinks}>
                         <Link to="/direct/inbox" component={RouterLink}>
                             <InboxIcon />
@@ -126,7 +126,7 @@ export default function Nav({ handleLoginModalOpen, handleRegisterModalOpen }) {
                             <FavoriteBorderIcon />
                         </Link>
                         <Link onClick={handleAnchorEl} aria-haspopup="true">
-                            <Avatar className={clsx(classes.userAvatar, { "active": anchorEl })} src={user.avatar} alt="Profile Avatar" />
+                            <Avatar className={clsx(classes.userAvatar, { "active": anchorEl })} src={user?.avatar} alt="Profile Avatar" />
                         </Link>
 
                         {Boolean(anchorEl) &&
