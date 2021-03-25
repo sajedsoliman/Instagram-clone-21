@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // UI imports
-import { Button, CardActions, InputBase, makeStyles } from '@material-ui/core'
+import { Button, CardActions, Grow, InputBase, makeStyles, Slide, Typography } from '@material-ui/core'
 
 // Component imports
 import Store from '../../../../common-components/firebase/Store'
@@ -9,12 +9,15 @@ import Store from '../../../../common-components/firebase/Store'
 // Contexts
 import { AuthedUser } from '../../../../user-context/AuthedUserContext'
 
+// Typing audio file (like messenger)
+import typingAudio from '../static/typing-audio.mp3'
 
 // style staff
 const useStyles = makeStyles(theme => ({
     wrapper: {
         boxSizing: "border-box",
         height: 65,
+        position: "relative",
     },
     formWrapper: {
         width: "100%",
@@ -24,6 +27,7 @@ const useStyles = makeStyles(theme => ({
         display: "flex",
         flexDirection: "row",
         alignItems: "center",
+        marginLeft: "0 !important",
     },
     submitBtn: {
         backgroundColor: "#31B8FA",
@@ -33,27 +37,50 @@ const useStyles = makeStyles(theme => ({
             backgroundColor: "transparent",
             border: "1px solid #31B8FA",
             color: "black"
+        },
+        "&.Mui-disabled": {
+            backgroundColor: "rgb(0 171 255 / 48%)",
+            color: "rgb(255 255 255 / 63%)"
         }
     },
     input: {
         flexGrow: 1
+    },
+    typingMsg: {
+        position: "absolute",
+        top: -30,
+        left: 30
     }
 }))
 
-function AddMessageForm({ chatId, senToId, loggedUserId }) {
+function AddMessageForm({ chatId, senToId, loggedUserId, chatTyping }) {
     const classes = useStyles()
     const loggedUser = AuthedUser()
 
+    // Refs
+    const audioRef = useRef()
+
     // State vars
     const [messageText, setMessageText] = useState("")
+
+    // Import Store component
+    const { handleSendMessage, handleOtherUserTyping } = Store()
+
+    // Listener for other user typing
+    useEffect(() => {
+        if (messageText != "")
+            audioRef.current.play()
+        else
+            audioRef.current.pause()
+
+        // handle toggle (typing) on the other user
+        handleOtherUserTyping(chatId, senToId, messageText)
+    }, [messageText])
 
     // Handle change message text
     const handleChangeMsgText = (e) => {
         setMessageText(e.target.value)
     }
-
-    // Import Store component
-    const { handleSendMessage } = Store()
 
     // handle submit the form
     const handleSubmit = (e) => {
@@ -63,11 +90,16 @@ function AddMessageForm({ chatId, senToId, loggedUserId }) {
 
         // Handle add it to db
         handleSendMessage(chatId, loggedUserId, loggedUser.username, senToId, messageText)
-
     }
 
     return (
         <CardActions className={classes.wrapper}>
+            {/* Typing... */}
+            {!chatTyping ? null :
+                <Slide direction="right" in={true}>
+                    <Typography className={classes.typingMsg} variant="body2" color="textSecondary">Typing...</Typography>
+                </Slide>
+            }
             <form onSubmit={handleSubmit} className={classes.formWrapper}>
                 <InputBase
                     value={messageText}
@@ -84,6 +116,9 @@ function AddMessageForm({ chatId, senToId, loggedUserId }) {
                     Send
                 </Button>
             </form>
+
+            {/* audio for typing */}
+            <audio ref={audioRef} src={typingAudio}></audio>
         </CardActions>
     )
 }

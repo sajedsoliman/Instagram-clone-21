@@ -4,15 +4,15 @@ import React, { useState, useEffect } from 'react'
 import { makeStyles } from '@material-ui/core'
 
 // Component imports
-import CustomMenuList from '../common-components/CustomMenuList'
-import Store from '../common-components/firebase/Store'
-import SearchMemberCard from '../common-components/user-related/SearchMemberCard'
+import CustomMenuList from '../../common-components/CustomMenuList'
+import Store from '../../common-components/firebase/Store'
+import SearchMemberCard from '../../common-components/user-related/SearchMemberCard'
 
 // style stuff
 const useStyles = makeStyles(theme => ({
     menu: {
         minWidth: 350
-    }
+    },
 }))
 
 function SearchResults(props) {

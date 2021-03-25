@@ -12,7 +12,7 @@ function AuthRoute({ children, ...other }) {
 
     return (
         <Route {...other} render={({ location }) =>
-            !(user == "no user") ? (
+            !(user == "no user") || location.state?.user ? (
                 children
             ) : (
                 <Redirect to={{

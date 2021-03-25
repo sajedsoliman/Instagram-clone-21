@@ -80,6 +80,7 @@ function UserInfo(props) {
             {/* User photo url */}
             <Grid item xs={3} sm={4} md={4} className={classes.imageSection}>
                 <UserProfileImage
+                    profileUser={user}
                     modalOpen={modalInfo}
                     handleModalOpen={handleModalOpen}
                     progressSize={window.innerWidth > 600 ? 170 : 95}

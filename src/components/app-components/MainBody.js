@@ -1,23 +1,23 @@
 import { Link } from 'react-router-dom'
 
+// Material-UI imports
+import { Container, makeStyles, Grid, Fab } from "@material-ui/core"
+
+// Icons
+import PostAdd from '@material-ui/icons/PostAdd';
+
 // Component imports
 import Posts from "./Posts/Posts"
-import MobileBottomBar from './MobileBottomBar';
 import SideBar from './side-bar/SideBar';
+import AppPage from './pages/AppPage';
 
 // Contexts
 import { AuthedUser } from '../user-context/AuthedUserContext';
-
-// Material-UI imports
-import { Container, makeStyles, Grid, Fab } from "@material-ui/core"
-import PostAdd from '@material-ui/icons/PostAdd';
 
 // styles
 const useStyles = makeStyles(theme => ({
     appBody: {
         background: "#fafafa",
-        paddingTop: 150,
-        paddingBottom: 50,
         minHeight: "100vh"
     },
     pageContainer: {
@@ -30,14 +30,6 @@ const useStyles = makeStyles(theme => ({
             paddingRight: theme.spacing(3)
         }
     },
-    addPostBtn: {
-        position: "fixed",
-        left: 34,
-        bottom: 29,
-        [theme.breakpoints.down("sm")]: {
-            display: "none"
-        }
-    }
 }))
 
 
@@ -46,7 +38,7 @@ export default function MainBody() {
 
     const classes = useStyles()
     return (
-        <div className={classes.appBody}>
+        <AppPage additionalClass={classes.appBody}>
 
             <Container className={classes.pageContainer}>
                 <Grid container>
@@ -61,25 +53,8 @@ export default function MainBody() {
                         }
                     </Grid>
                 </Grid>
-
-                {/* Add post button for desktop */}
-                {user != "no user" && (
-                    <>
-                        <Fab
-                            className={classes.addPostBtn}
-                            color="secondary"
-                            variant="extended"
-                            component={Link} to="/add-post"
-                        >
-                            <PostAdd />  Add Post
-                        </Fab>
-
-                        {/* Mobile DownBar */}
-                        <MobileBottomBar />
-                    </>
-                )}
             </Container>
 
-        </div>
+        </AppPage>
     )
 }

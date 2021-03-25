@@ -326,15 +326,17 @@ function Store() {
                 if (window.location.pathname != `/direct/inbox/t/${chatId}`) return
 
                 setChat(snapshot.exists ? { ...snapshot.data() } : null)
-                const senToUser = snapshot.data().members.find(member => member.id != userId)
 
-                db.collection("members")
-                    .doc(senToUser.id)
-                    .collection("chats")
-                    .doc(chatId)
-                    .update({
-                        lastMsgSeen: true
-                    })
+                if (snapshot.data().lastMsg.id != userId) {
+                    const senToUser = snapshot.data().members.find(member => member.id != userId)
+                    db.collection("members")
+                        .doc(senToUser.id)
+                        .collection("chats")
+                        .doc(chatId)
+                        .update({
+                            lastMsgSeen: true
+                        })
+                }
             })
     }
 
@@ -354,30 +356,7 @@ function Store() {
 
     // handle send a message to both of two members
     const handleSendMessage = (chatId, loggedUserId, senderName, senToId, msgText) => {
-        // handle update the chat's last message
-        // For the logged user
-        const lastMsg = {
-            id: loggedUserId,
-            text: msgText,
-            sendDate: firebase.firestore.FieldValue.serverTimestamp()
-        }
-        db.collection("members")
-            .doc(loggedUserId)
-            .collection("chats")
-            .doc(chatId)
-            .update({
-                lastMsg: { ...lastMsg }
-            })
-
-        // For the senTo user
-        db.collection("members")
-            .doc(senToId)
-            .collection("chats")
-            .doc(chatId)
-            .update({
-                lastMsg: { ...lastMsg }
-            })
-
+        // Send the message first so it arrives faster
         // message object
         const messageObj = {
             senderId: loggedUserId,
@@ -387,6 +366,15 @@ function Store() {
         }
 
         // handle add the message to loggedUser chat
+        // Send the message first
+        db
+            .collection("members")
+            .doc(loggedUserId)
+            .collection("chats")
+            .doc(chatId)
+            .collection("messages")
+            .add(messageObj)
+
         // handle the chat's last msg seen
         db
             .collection("members")
@@ -395,13 +383,6 @@ function Store() {
             .doc(chatId)
             .update({
                 lastMsgSeen: false
-            }).then(success => {
-                db.collection("members")
-                    .doc(loggedUserId)
-                    .collection("chats")
-                    .doc(chatId)
-                    .collection("messages")
-                    .add(messageObj)
             })
 
         // handle add the message to SenTo chat
@@ -427,6 +408,31 @@ function Store() {
                         .collection("messages")
                         .add(messageObj)
                 }
+            })
+
+
+        // handle update the chat's last message
+        // For the logged user
+        const lastMsg = {
+            id: loggedUserId,
+            text: msgText,
+            sendDate: firebase.firestore.FieldValue.serverTimestamp()
+        }
+        db.collection("members")
+            .doc(loggedUserId)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                lastMsg: { ...lastMsg }
+            })
+
+        // For the senTo user
+        db.collection("members")
+            .doc(senToId)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                lastMsg: { ...lastMsg }
             })
     }
 
@@ -590,7 +596,7 @@ function Store() {
             .then(snapshot => console.log(snapshot.empty)) */
     }
 
-    // handleLastMsgSeen
+    // handle see the user's last msg
     const handleLastMsgSeen = (chatId) => {
         db.collection("members")
             .doc(loggedUser.id)
@@ -603,6 +609,17 @@ function Store() {
             })
     }
 
+    // handle show (typing...) when the other user is typing
+    const handleOtherUserTyping = (chatId, setToUserId, msgText) => {
+        db
+            .collection("members")
+            .doc(setToUserId)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                isTyping: msgText == "" ? false : true
+            })
+    }
 
     return {
         posts,
@@ -631,6 +648,7 @@ function Store() {
         deleteChat,
         getPostComments,
         handleLastMsgSeen,
+        handleOtherUserTyping,
         loading,
     }
 }

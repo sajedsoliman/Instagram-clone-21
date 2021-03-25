@@ -1,5 +1,6 @@
 import { useEffect } from "react"
 import { MenuList, makeStyles, Popper, ClickAwayListener, Paper, Grow } from '@material-ui/core'
+import clsx from "clsx"
 
 // styles
 const useStyles = makeStyles((theme) => ({
@@ -10,7 +11,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function MenuListCom(props) {
     // destructuring props
-    const { items, anchorEl, handleClose, open, placement = "top-end", menuClassName, children } = props
+    const { items, anchorEl, handleClose, open, placement = "top-end", menuClassName, popperClassName, children } = props
     const classes = useStyles()
 
 
@@ -18,18 +19,18 @@ export default function MenuListCom(props) {
         open: open != undefined ? open : Boolean(anchorEl),
         anchorEl: anchorEl,
         transition: true,
-        className: classes.popper,
+        className: clsx(popperClassName, classes.popper),
         placement
     }
 
     return (
         <Popper {...popperProps}>
             <Grow in={open || Boolean(anchorEl)}>
-                <Paper>
+                <Paper elevation={3}>
                     <ClickAwayListener onClickAway={handleClose}>
-                        <MenuList className={menuClassName}
+                        <MenuList
+                            className={menuClassName}
                             disablePadding
-                            variant="menu"
                             autoFocusItem={Boolean(anchorEl)}>
                             {children}
                         </MenuList>

@@ -18,20 +18,15 @@ import SendMessageSide from './SendMessageSide'
 
 // style staff
 const useStyles = makeStyles(theme => ({
-    page: {
-        paddingTop: 90
-    },
+
 }))
 
 
 function Inbox() {
-    const layout = Layout()
     const classes = useStyles()
-
 
     // Router imports
     const { path } = useRouteMatch()
-    const location = useLocation()
 
     return (
         <AppPage additionalClass={classes.page}>

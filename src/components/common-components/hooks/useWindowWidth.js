@@ -7,8 +7,8 @@ function useWindowWidth() {
     const [windowWidth, setWindowWidth] = useState(window.innerWidth)
 
     // Window onResize callback (to stop the event listener on unMount)
-    const onResize = useCallback(function () {
-        setWindowWidth(this.innerWidth)
+    const onResize = useCallback(() => {
+        setWindowWidth(window.innerWidth)
     })
 
     // set a listener to catch window size changing

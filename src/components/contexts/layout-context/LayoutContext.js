@@ -16,7 +16,7 @@ export function LayoutContextProvider({ children }) {
                 height: 66
             },
             mobile: {
-                height: 62
+                height: 60
             }
         }
     }

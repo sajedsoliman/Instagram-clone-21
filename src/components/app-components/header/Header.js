@@ -1,4 +1,5 @@
 import { useRef, useState } from "react"
+import { Link as RouterLink } from 'react-router-dom'
 
 // material-ui imports
 import { makeStyles } from "@material-ui/core"
@@ -8,17 +9,25 @@ import Container from "@material-ui/core/Container"
 import Grid from "@material-ui/core/Grid"
 
 // component imports
-import Controls from "../common-components/controls/Controls"
-import Nav from '../common-components/header/Nav'
-import PopUp from "../common-components/PopUp"
-import LoginForm from './forms/LoginForm'
-import RegisterForm from "./forms/RegisterForm"
+import Controls from "../../common-components/controls/Controls"
+import Nav from '../../common-components/header/Nav'
+import PopUp from "../../common-components/PopUp"
+import LoginForm from '../forms/LoginForm'
+import RegisterForm from "../forms/RegisterForm"
 import SearchResults from "./SearchResults"
+import LoggedUserAction from "./LoggedUserAction"
+
+// Contexts
+import { AuthedUser } from "../../user-context/AuthedUserContext"
 
 // styles
 const useStyles = makeStyles((theme) => ({
     header: {
-        background: "#fff"
+        background: "#fff",
+
+        [theme.breakpoints.down("xs")]: {
+            display: "none"
+        }
     },
     logoImg: {
         verticalAlign: "middle",
@@ -31,11 +40,17 @@ const useStyles = makeStyles((theme) => ({
         [theme.breakpoints.down("xs")]: {
             display: "none"
         }
-    }
+    },
+    nav: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end",
+    },
 }))
 
 export default function Header(props) {
     const classes = useStyles()
+    const loggedUser = AuthedUser()
 
     // Refs
     const searchInput = useRef()
@@ -87,16 +102,24 @@ export default function Header(props) {
                 <Toolbar disableGutters>
                     <Grid container>
                         <Grid item xs={4} sm={2}>
-                            <img className={classes.logoImg} src="https://i.ibb.co/Bqm1g6x/735145cfe0a4.png" alt="instagram" />
+                            <RouterLink to="/">
+                                <img className={classes.logoImg} src="https://i.ibb.co/Bqm1g6x/735145cfe0a4.png" alt="instagram" />
+                            </RouterLink>
                         </Grid>
                         <Grid className={classes.searchContainer} item sm={5}>
                             <Controls.SearchBox {...searchInputProps} />
                             <SearchResults resetSearch={() => setSearchValue("")} anchorEl={searchInput} searchText={searchValue} />
                         </Grid>
                         <Grid item xs={8} sm={5}>
-                            <Nav
-                                handleLoginModalOpen={handleLoginModalOpen}
-                                handleRegisterModalOpen={handleRegisterModalOpen} />
+                            <nav className={classes.nav}>
+                                <Nav />
+
+                                {/* Logged user action => login / register */}
+                                {loggedUser == "no user" &&
+                                    <LoggedUserAction handleLoginModalOpen={handleLoginModalOpen}
+                                        handleRegisterModalOpen={handleRegisterModalOpen} />
+                                }
+                            </nav>
 
                             {/* Login Modal */}
                             <PopUp infoFunc={loginModal} closeHandle={handleLoginModalClose}>

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 // UI imports
-import { CardContent, Container, List, makeStyles, Typography } from '@material-ui/core'
+import { Avatar, CardContent, Container, Grow, List, makeStyles, Typography } from '@material-ui/core'
 
 // Contexts
 
@@ -35,7 +35,15 @@ const useStyles = makeStyles(theme => ({
     messagesList: {
     },
     msgSeen: {
-        cursor: "default"
+        cursor: "default",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end"
+    },
+    seenAvatar: {
+        width: 12,
+        height: 12,
+        marginLeft: 4,
     }
 }))
 
@@ -77,6 +85,7 @@ function ChatMessages({ chatId, userId, senToMember, chat }) {
 
     // add message form props
     const messageFormProps = {
+        chatTyping: chat.isTyping,
         chatId,
         senToId: senToMember.id,
         loggedUserId: userId,
@@ -90,9 +99,11 @@ function ChatMessages({ chatId, userId, senToMember, chat }) {
                 <List className={classes.messagesList}>
                     {mappedMessages}
                 </List>
+                {/* handle message seen */}
                 {chat.lastMsg.id == userId && (
                     <Typography variant="caption" component='div' align="right" className={classes.msgSeen}>
-                        {chat.lastMsgSeen ? "seen" : "sent"}
+                        {chat.lastMsgSeen ? `seen by` : "sent"}
+                        {chat.lastMsgSeen && <Avatar className={classes.seenAvatar} src={senToMember.avatar} />}
                     </Typography>
                 )}
             </CardContent>

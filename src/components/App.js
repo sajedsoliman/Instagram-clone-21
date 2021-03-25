@@ -1,11 +1,18 @@
 // react router
-import { Route, Switch, useLocation } from 'react-router-dom'
+import { Route, Switch, useLocation, Link as RouterLink } from 'react-router-dom'
+
+// Material imports
+import { Fab, makeStyles, ThemeProvider } from "@material-ui/core"
+
+// Icons
+import { PostAdd } from '@material-ui/icons'
+
 
 // component imports
-import Header from "./app-components/Header"
+import Header from "./app-components/header/Header"
 import MainBody from "./app-components/MainBody"
 import CreatePost from "./app-components/pages/create-post/CreatePost"
-import { AuthedUserProvider } from './user-context/AuthedUserContext'
+import { AuthedUser, AuthedUserProvider } from './user-context/AuthedUserContext'
 import { NotificationContext } from "./notification-context/NotificationContext"
 import UserProfile from "./app-components/pages/user-profile/UserProfile"
 import SinglePost from './app-components/pages/single-post/SinglePost'
@@ -20,17 +27,38 @@ import Login from '../components/app-components/pages/auth/Login'
 import SignUp from './app-components/pages/auth/SignUp'
 import { LayoutContextProvider } from './contexts/layout-context/LayoutContext'
 import NotFound from './app-components/pages/404-page/NotFound'
+import Inbox from './app-components/pages/inbox/Inbox'
+import ActiveChat from './app-components/pages/inbox/single-chat/ActiveChat'
+import MobileBottomBar from './app-components/header/MobileBottomBar'
+import SearchUser from './app-components/pages/search-user/SearchUser'
+
 
 // style stuff
 import "normalize.css"
 import "../styles/dist/main.min.css"
-import { ThemeProvider } from "@material-ui/core"
 import commonTheme from "./commonTheme"
-import Inbox from './app-components/pages/inbox/Inbox'
-import ActiveChat from './app-components/pages/inbox/single-chat/ActiveChat'
+
+const useStyles = makeStyles(theme => ({
+    addPostBtn: {
+        position: "fixed",
+        left: 9,
+        bottom: 10,
+
+        "& .MuiSvgIcon-root": {
+            fontSize: 27
+        },
+
+        [theme.breakpoints.down("xs")]: {
+            display: "none"
+        }
+    }
+}))
 
 
 export default function App() {
+    const classes = useStyles()
+    const loggedUser = AuthedUser()
+
     const location = useLocation()
     const background = location.state && location.state.background
     const mobile = location.state && location.state.mobile
@@ -65,6 +93,11 @@ export default function App() {
                                     <UnAuthRoute path="/register">
                                         <SignUp />
                                     </UnAuthRoute>
+
+                                    {/* search a user page */}
+                                    <Route path="/search-user">
+                                        <SearchUser />
+                                    </Route>
 
                                     {/* User followers page - popup in desktops and full list in mobiles */}
                                     <Route path="/:userId/followers" exact render={() => {
@@ -143,6 +176,22 @@ export default function App() {
                                     } />
                                 )
                             }
+
+                            {/* Add post button for desktop */}
+                            {loggedUser != "no user" && (
+                                <>
+                                    <Fab
+                                        className={classes.addPostBtn}
+                                        color="secondary"
+                                        component={RouterLink}
+                                        to="/add-post">
+                                        <PostAdd />
+                                    </Fab>
+
+                                    {/* Mobile DownBar */}
+                                    <MobileBottomBar />
+                                </>
+                            )}
                         </LayoutContextProvider>
                     </AuthedUserProvider>
                 </NotificationContext>

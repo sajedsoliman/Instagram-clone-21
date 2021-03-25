@@ -23,8 +23,10 @@ function ActiveChat() {
         gridItem: {
             height: `calc(100vh - ${layout.header.desktop.height}px - 34px)`,
 
+            // the extra 10px to fully see the send message form
+            // layout.header.mobile.height for the bottom bar
             [theme.breakpoints.down("sm")]: {
-                height: `calc(100vh - ${layout.header.mobile.height}px)`,
+                height: `calc(100vh - ${layout.header.mobile.height}px - 10px)`,
             }
         },
     }))

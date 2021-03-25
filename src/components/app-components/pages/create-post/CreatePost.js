@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
         margin: "auto",
         minHeight: 300,
         padding: 20,
-        marginBottom: 160,
+        marginBottom: 30,
 
         "& > input[type=file]": {
             marginTop: 10

@@ -16,10 +16,6 @@ const useStyles = makeStyles(theme => ({
     header: {
         borderBottom: `1px solid ${theme.palette.divider}`,
         height: 35,
-        [theme.breakpoints.down(960)]: {
-            marginTop: 60,
-            borderTop: `1px solid ${theme.palette.divider}`,
-        }
     },
     avatar: {
         width: 35,
@@ -40,12 +36,10 @@ function ChatHeader({ member, toggleDetails, detailsOpen }) {
 
     // State vars
 
-
     // senTo avatar
     const headerAvatar = (
         <Avatar className={classes.avatar} src={avatar} />
     )
-
 
     // Chat title props
     const titleProps = {

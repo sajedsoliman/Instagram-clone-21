@@ -1,12 +1,11 @@
 import { Link as RouterLink } from 'react-router-dom'
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 import clsx from "clsx"
 
 // Material-UI imports
 import makeStyles from "@material-ui/core/styles/makeStyles"
 import Link from "@material-ui/core/Link"
 import Avatar from "@material-ui/core/Avatar"
-import Button from "@material-ui/core/Button"
 import MenuItem from "@material-ui/core/MenuItem"
 
 // icons
@@ -14,21 +13,28 @@ import HomeOutlined from '@material-ui/icons/HomeOutlined';
 import Home from "@material-ui/icons/Home"
 import InboxIcon from '@material-ui/icons/Inbox';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import { Settings, SupervisedUserCircle } from '@material-ui/icons'
+import { PostAdd, Search, Settings, SupervisedUserCircle } from '@material-ui/icons'
 
 // component imports / info
 import CustomMenuList from "../CustomMenuList"
-import info from "./info"
 import { auth, db } from "../firebase/database"
 import { AuthedUser } from '../../user-context/AuthedUserContext'
 import { Divider } from '@material-ui/core'
 
+// Hooks
+import useWindowWidth from '../../common-components/hooks/useWindowWidth'
 
 const useStyles = makeStyles((theme) => ({
     linkNav: {
         display: "flex",
         alignItems: "center",
         justifyContent: "flex-end",
+
+        [theme.breakpoints.down("xs")]: {
+            justifyContent: "space-between",
+            width: "100%",
+        },
+
         "& a": {
             cursor: "default",
             color: theme.palette.text.primary,
@@ -57,14 +63,15 @@ const useStyles = makeStyles((theme) => ({
             boxShadow: "0 0 0 2px white, 0 0 0 3.3px #000"
         }
     },
-    signinBtn: {
-        marginLeft: 20,
-        marginRight: 5
-    },
     item: {
         marginRight: "0 !important",
         "& svg": {
             marginRight: 15
+        }
+    },
+    menuPopper: {
+        [theme.breakpoints.down("xs")]: {
+            top: "-12px !important",
         }
     },
     menu: {
@@ -72,21 +79,27 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
-export default function Nav({ handleLoginModalOpen, handleRegisterModalOpen }) {
+export default function Nav({ navClassName }) {
     const user = AuthedUser()
 
     const [anchorEl, setAnchorEl] = useState(null)
 
     const handleAnchorEl = (e) => {
-        setAnchorEl(e.currentTarget)
+        setAnchorEl(prev => prev == null ? e.currentTarget : null)
     }
 
     const handleCloseMenu = () => {
         setAnchorEl(null)
     }
 
+    // Get window width from the hook
+    const { windowWidth } = useWindowWidth()
+
     // handle logout
     const handleLogout = () => {
+        // close the menu when logout
+        handleCloseMenu()
+
         // update user's active state to false
         db.collection("members")
             .doc(user.uid)
@@ -108,54 +121,58 @@ export default function Nav({ handleLoginModalOpen, handleRegisterModalOpen }) {
     }
 
     return (
-        <nav className={classes.linkNav}>
+        <nav className={clsx(classes.linkNav, navClassName)}>
             <Link to="/" component={RouterLink}>
                 {Boolean(anchorEl) ? <HomeOutlined fontSize="large" /> : <Home fontSize="large" />}
             </Link>
 
             {
-                user !== "no user" ?
-                    <div className={classes.secondaryLinks}>
-                        <Link to="/direct/inbox" component={RouterLink}>
-                            <InboxIcon />
-                        </Link>
-                        <Link href="/" >
-                            <i className="far fa-compass" />
-                        </Link>
-                        <Link href="/">
-                            <FavoriteBorderIcon />
-                        </Link>
-                        <Link onClick={handleAnchorEl} aria-haspopup="true">
-                            <Avatar className={clsx(classes.userAvatar, { "active": anchorEl })} src={user?.avatar} alt="Profile Avatar" />
-                        </Link>
-
-                        {Boolean(anchorEl) &&
-                            (<CustomMenuList menuClassName={classes.menu} placement={"bottom"} anchorEl={anchorEl} handleClose={handleCloseMenu}>
-                                {/* Profile */}
-                                <MenuItem
-                                    {...menuProps}
-                                    to={`/${user.username}`}>
-                                    <SupervisedUserCircle /> Profile
-                                    </MenuItem>
-                                {/* Settings */}
-                                <MenuItem
-                                    {...menuProps}
-                                    to={`/accounts/edit`}>
-                                    <Settings /> Settings
-                                    </MenuItem>
-                                <Divider />
-                                {/* Logout Functionality */}
-                                <MenuItem dense onClick={handleLogout}>Logout</MenuItem>
-                            </CustomMenuList>)}
-                    </div>
-
-                    : (
+                user !== "no user" &&
+                <div className={classes.secondaryLinks}>
+                    {windowWidth < 600 && (
                         <>
-                            <Button className={classes.signinBtn} variant="outlined" color="primary" size="small" onClick={handleLoginModalOpen}>Login</Button>
-
-                            <Button className={classes.registerBtn} variant="outlined" color="primary" size="small" onClick={handleRegisterModalOpen}>Register</Button>
+                            <Link to="/search-user" component={RouterLink}>
+                                <Search />
+                            </Link>
+                            <Link to="/add-post" component={RouterLink}>
+                                <PostAdd color="secondary" />
+                            </Link>
                         </>
-                    )
+                    )}
+                    <Link to="/direct/inbox" component={RouterLink}>
+                        <InboxIcon />
+                    </Link>
+                    <Link to="/" >
+                        <FavoriteBorderIcon />
+                    </Link>
+                    <Link onClick={handleAnchorEl} aria-haspopup="true">
+                        <Avatar className={clsx(classes.userAvatar, { "active": anchorEl })} src={user?.avatar} alt="Profile Avatar" />
+                    </Link>
+
+                    {Boolean(anchorEl) &&
+                        (<CustomMenuList
+                            popperClassName={classes.menuPopper}
+                            menuClassName={classes.menu}
+                            placement={windowWidth < 600 ? "top-start" : "bottom-end"}
+                            anchorEl={anchorEl}
+                            handleClose={handleCloseMenu}>
+                            {/* Profile */}
+                            <MenuItem
+                                {...menuProps}
+                                to={`/${user.username}`}>
+                                <SupervisedUserCircle /> Profile
+                                    </MenuItem>
+                            {/* Settings */}
+                            <MenuItem
+                                {...menuProps}
+                                to={`/accounts/edit`}>
+                                <Settings /> Settings
+                                    </MenuItem>
+                            <Divider />
+                            {/* Logout Functionality */}
+                            <MenuItem dense onClick={handleLogout}>Logout</MenuItem>
+                        </CustomMenuList>)}
+                </div>
             }
         </nav>
     )

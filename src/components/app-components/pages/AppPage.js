@@ -5,8 +5,16 @@ import clsx from 'clsx'
 // style
 const useStyles = makeStyles(theme => ({
     page: {
-        paddingTop: 150,
-        maxHeight: "100vh",
+        paddingTop: 90,
+        height: "100vh",
+        overflowY: "auto",
+        boxSizing: "border-box",
+
+        // to disable the padding in mobiles
+        [theme.breakpoints.down("xs")]: {
+            paddingTop: 20,
+            paddingBottom: 40
+        }
     },
 }))
 

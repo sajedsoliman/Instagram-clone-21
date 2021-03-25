@@ -35,6 +35,7 @@ function LoginForm({ handleLoginModalClose }) {
         validationErrors
     } = useForm(userInitialValues, false)
 
+    // Login with google
     const handleSignInWithGoogle = () => {
         const provider = new firebase.auth.GoogleAuthProvider()
 
@@ -43,6 +44,7 @@ function LoginForm({ handleLoginModalClose }) {
                 if (typeof (handleLoginModalClose) == "function") {
                     handleLoginModalClose()
                 }
+
                 history.replace(from)
             }).catch(err => {
                 window.location = "/"
@@ -55,9 +57,8 @@ function LoginForm({ handleLoginModalClose }) {
                 if (typeof (handleLoginModalClose) == "function") {
                     handleLoginModalClose()
                 }
-                setTimeout(() => {
-                    history.replace(from)
-                }, 1000)
+
+                history.replace(from.pathname, { user: true })
             })
             .catch(err => alert(err.message))
     }
@@ -66,8 +67,8 @@ function LoginForm({ handleLoginModalClose }) {
         <div>
             <UserForm validationErrors={validationErrors} user={user} actionHandler={handleSignInWithPasswordAndEmail} handleChange={handleInputsChange} action={"login"} />
 
-            <Button className={classes.googleSignUpBtn} fullWidth onClick={handleSignInWithGoogle} variant="contained" color="default" startIcon={<i className="fab fa-google" />
-            }>Login With Google</Button>
+            {/* <Button className={classes.googleSignUpBtn} fullWidth onClick={handleSignInWithGoogle} variant="contained" color="default" startIcon={<i className="fab fa-google" />
+            }>Login With Google</Button> */}
         </div>
     )
 }

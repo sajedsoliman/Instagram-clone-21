@@ -60,7 +60,7 @@ function UserProfileImage(props) {
     // destructuring through props
     const { fullName, avatar, handleModalOpen,
         progressSize, progressClassName, modalOpen,
-        avatarClassName } = props
+        avatarClassName, profileUser } = props
 
     // refs
     const avatarInputRef = useRef()
@@ -120,14 +120,18 @@ function UserProfileImage(props) {
         filepondRef: avatarInputRef,
     }
 
+    // Some info
+    const isUserOwner = (loggedUser != "no user" && loggedUser.id == profileUser?.id) ||
+        loggedUser != "no user" && profileUser == undefined
+
     return (
         <>
             {/* The avatar itself */}
             <div className={classes.avatarWrapper}>
                 <Avatar
                     className={avatarClassName}
-                    style={{ cursor: !loggedUser && "default" }}
-                    onClick={loggedUser && handleModalOpen}
+                    style={{ cursor: !isUserOwner && "default" }}
+                    onClick={isUserOwner && handleModalOpen}
                     alt={fullName}
                     src={avatar}>{fullName[0]}
                 </Avatar>
