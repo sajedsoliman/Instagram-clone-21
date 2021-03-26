@@ -66,16 +66,21 @@ function AddMessageForm({ chatId, senToId, loggedUserId, chatTyping }) {
     // Import Store component
     const { handleSendMessage, handleOtherUserTyping } = Store()
 
-    // Listener for other user typing
     useEffect(() => {
-        if (messageText != "")
+        if (chatTyping) {
             audioRef.current.play()
+        }
         else
             audioRef.current.pause()
+    }, [chatTyping])
+
+
+    // Listener for other user typing
+    useEffect(() => {
 
         // handle toggle (typing) on the other user
         handleOtherUserTyping(chatId, senToId, messageText)
-    }, [messageText])
+    }, [messageText, chatTyping])
 
     // Handle change message text
     const handleChangeMsgText = (e) => {
@@ -118,7 +123,7 @@ function AddMessageForm({ chatId, senToId, loggedUserId, chatTyping }) {
             </form>
 
             {/* audio for typing */}
-            <audio ref={audioRef} src={typingAudio}></audio>
+            <audio ref={audioRef} src="https://firebasestorage.googleapis.com/v0/b/insta-clone-2-4dd4b.appspot.com/o/typing-audio.mp3?alt=media&token=5f88dc3d-1fbc-4145-a092-625b1b3a86da"></audio>
         </CardActions>
     )
 }
