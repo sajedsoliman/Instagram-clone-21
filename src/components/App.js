@@ -43,6 +43,7 @@ const useStyles = makeStyles(theme => ({
         position: "fixed",
         left: 9,
         bottom: 10,
+        zIndex: 2000,
 
         "& .MuiSvgIcon-root": {
             fontSize: 27

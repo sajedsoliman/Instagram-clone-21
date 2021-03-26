@@ -349,6 +349,7 @@ function Store() {
             .collection("messages")
             .orderBy("sendDate", "asc")
             .onSnapshot(snapshot => {
+                console.log("Here")
                 const messages = snapshot.docs.map(doc => ({ id: doc.id, message: doc.data() }))
                 setMessages(messages)
             })

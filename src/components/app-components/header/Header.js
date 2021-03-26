@@ -56,33 +56,7 @@ export default function Header(props) {
     const searchInput = useRef()
 
     // State vars
-    const [loginModal, setLoginModal] = useState({ title: null, isOpen: false })
-    const [registerModal, setRegisterModal] = useState({ title: null, isOpen: false })
     const [searchValue, setSearchValue] = useState("")
-
-    const handleLoginModalOpen = () => {
-        setLoginModal(prev => ({
-            ...prev, isOpen: true
-        }))
-    }
-
-    const handleLoginModalClose = () => {
-        setLoginModal(prev => ({
-            ...prev, isOpen: false
-        }))
-    }
-
-    const handleRegisterModalOpen = () => {
-        setRegisterModal(prev => ({
-            ...prev, isOpen: true
-        }))
-    }
-
-    const handleRegisterModalClose = () => {
-        setRegisterModal(prev => ({
-            ...prev, isOpen: false
-        }))
-    }
 
     // search input change handler 
     const handleChangeSearch = (e) => {
@@ -115,21 +89,11 @@ export default function Header(props) {
                                 <Nav />
 
                                 {/* Logged user action => login / register */}
-                                {loggedUser == "no user" &&
+                                {/* {loggedUser == "no user" &&
                                     <LoggedUserAction handleLoginModalOpen={handleLoginModalOpen}
                                         handleRegisterModalOpen={handleRegisterModalOpen} />
-                                }
+                                } */}
                             </nav>
-
-                            {/* Login Modal */}
-                            <PopUp infoFunc={loginModal} closeHandle={handleLoginModalClose}>
-                                <LoginForm handleLoginModalClose={handleLoginModalClose} />
-                            </PopUp>
-
-                            {/* Register Modal */}
-                            <PopUp infoFunc={registerModal} closeHandle={handleRegisterModalClose}>
-                                <RegisterForm handleCloseModal={handleRegisterModalClose} />
-                            </PopUp>
                         </Grid>
                     </Grid>
                 </Toolbar>

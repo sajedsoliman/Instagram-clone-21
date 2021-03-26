@@ -70,6 +70,7 @@ function ChatMessages({ chatId, userId, senToMember, chat }) {
     useEffect(() => {
         if (userId) {
             // put a listener on messages
+            console.log("here")
             getChatMessages(userId, chatId, setMessages)
         }
     }, [chatId])

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import clsx from "clsx"
 
 // Material-UI imports
+import { Divider } from '@material-ui/core'
 import makeStyles from "@material-ui/core/styles/makeStyles"
 import Link from "@material-ui/core/Link"
 import Avatar from "@material-ui/core/Avatar"
@@ -19,7 +20,10 @@ import { PostAdd, Search, Settings, SupervisedUserCircle } from '@material-ui/ic
 import CustomMenuList from "../CustomMenuList"
 import { auth, db } from "../firebase/database"
 import { AuthedUser } from '../../user-context/AuthedUserContext'
-import { Divider } from '@material-ui/core'
+import LoggedUserAction from '../../app-components/header/LoggedUserAction'
+import PopUp from '../PopUp'
+import LoginForm from '../../app-components/forms/LoginForm'
+import RegisterForm from '../../app-components/forms/RegisterForm'
 
 // Hooks
 import useWindowWidth from '../../common-components/hooks/useWindowWidth'
@@ -82,7 +86,35 @@ const useStyles = makeStyles((theme) => ({
 export default function Nav({ navClassName }) {
     const user = AuthedUser()
 
+    // State vars
     const [anchorEl, setAnchorEl] = useState(null)
+    const [loginModal, setLoginModal] = useState({ title: null, isOpen: false })
+    const [registerModal, setRegisterModal] = useState({ title: null, isOpen: false })
+
+    const handleLoginModalOpen = () => {
+        setLoginModal(prev => ({
+            ...prev, isOpen: true
+        }))
+    }
+
+    const handleRegisterModalOpen = () => {
+        setRegisterModal(prev => ({
+            ...prev, isOpen: true
+        }))
+    }
+
+
+    const handleLoginModalClose = () => {
+        setLoginModal(prev => ({
+            ...prev, isOpen: false
+        }))
+    }
+
+    const handleRegisterModalClose = () => {
+        setRegisterModal(prev => ({
+            ...prev, isOpen: false
+        }))
+    }
 
     const handleAnchorEl = (e) => {
         setAnchorEl(prev => prev == null ? e.currentTarget : null)
@@ -127,53 +159,67 @@ export default function Nav({ navClassName }) {
             </Link>
 
             {
-                user !== "no user" &&
-                <div className={classes.secondaryLinks}>
-                    {windowWidth < 600 && (
-                        <>
-                            <Link to="/search-user" component={RouterLink}>
-                                <Search />
-                            </Link>
-                            <Link to="/add-post" component={RouterLink}>
-                                <PostAdd color="secondary" />
-                            </Link>
-                        </>
-                    )}
-                    <Link to="/direct/inbox" component={RouterLink}>
-                        <InboxIcon />
-                    </Link>
-                    <Link to="/" >
-                        <FavoriteBorderIcon />
-                    </Link>
-                    <Link onClick={handleAnchorEl} aria-haspopup="true">
-                        <Avatar className={clsx(classes.userAvatar, { "active": anchorEl })} src={user?.avatar} alt="Profile Avatar" />
-                    </Link>
+                user !== "no user" ?
+                    <div className={classes.secondaryLinks}>
+                        {windowWidth < 600 && (
+                            <>
+                                <Link to="/search-user" component={RouterLink}>
+                                    <Search />
+                                </Link>
+                                <Link to="/add-post" component={RouterLink}>
+                                    <PostAdd color="secondary" />
+                                </Link>
+                            </>
+                        )}
+                        <Link to="/direct/inbox" component={RouterLink}>
+                            <InboxIcon />
+                        </Link>
+                        <Link to="/" >
+                            <FavoriteBorderIcon />
+                        </Link>
+                        <Link onClick={handleAnchorEl} aria-haspopup="true">
+                            <Avatar className={clsx(classes.userAvatar, { "active": anchorEl })} src={user?.avatar} alt="Profile Avatar" />
+                        </Link>
 
-                    {Boolean(anchorEl) &&
-                        (<CustomMenuList
-                            popperClassName={classes.menuPopper}
-                            menuClassName={classes.menu}
-                            placement={windowWidth < 600 ? "top-start" : "bottom-end"}
-                            anchorEl={anchorEl}
-                            handleClose={handleCloseMenu}>
-                            {/* Profile */}
-                            <MenuItem
-                                {...menuProps}
-                                to={`/${user.username}`}>
-                                <SupervisedUserCircle /> Profile
+                        {Boolean(anchorEl) &&
+                            (<CustomMenuList
+                                popperClassName={classes.menuPopper}
+                                menuClassName={classes.menu}
+                                placement={windowWidth < 600 ? "top-start" : "bottom-end"}
+                                anchorEl={anchorEl}
+                                handleClose={handleCloseMenu}>
+                                {/* Profile */}
+                                <MenuItem
+                                    {...menuProps}
+                                    to={`/${user.username}`}>
+                                    <SupervisedUserCircle /> Profile
                                     </MenuItem>
-                            {/* Settings */}
-                            <MenuItem
-                                {...menuProps}
-                                to={`/accounts/edit`}>
-                                <Settings /> Settings
+                                {/* Settings */}
+                                <MenuItem
+                                    {...menuProps}
+                                    to={`/accounts/edit`}>
+                                    <Settings /> Settings
                                     </MenuItem>
-                            <Divider />
-                            {/* Logout Functionality */}
-                            <MenuItem dense onClick={handleLogout}>Logout</MenuItem>
-                        </CustomMenuList>)}
-                </div>
+                                <Divider />
+                                {/* Logout Functionality */}
+                                <MenuItem dense onClick={handleLogout}>Logout</MenuItem>
+                            </CustomMenuList>)}
+                    </div>
+                    : (
+                        <LoggedUserAction handleLoginModalOpen={handleLoginModalOpen}
+                            handleRegisterModalOpen={handleRegisterModalOpen} />
+                    )
             }
+
+            {/* Login Modal */}
+            <PopUp infoFunc={loginModal} closeHandle={handleLoginModalClose}>
+                <LoginForm handleLoginModalClose={handleLoginModalClose} />
+            </PopUp>
+
+            {/* Register Modal */}
+            <PopUp infoFunc={registerModal} closeHandle={handleRegisterModalClose}>
+                <RegisterForm handleCloseModal={handleRegisterModalClose} />
+            </PopUp>
         </nav>
     )
 }

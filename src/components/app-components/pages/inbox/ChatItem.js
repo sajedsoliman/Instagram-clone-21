@@ -10,7 +10,9 @@ import { Avatar, Badge, ListItem, ListItemAvatar, ListItemText, makeStyles, Typo
 import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
 
 // Component imports
+import clsx from 'clsx'
 import Store from '../../../common-components/firebase/Store'
+import { db } from '../../../common-components/firebase/database';
 
 // style staff
 const useStyles = makeStyles(theme => ({
@@ -20,6 +22,9 @@ const useStyles = makeStyles(theme => ({
         boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
     },
     chatAdditionalInfoTypo: {
+        "&.not-seen": {
+            fontWeight: "bold"
+        },
 
         "& > span": {
             display: "flex",
@@ -53,13 +58,25 @@ function ChatItem({ chat, authUserId, chatDocId }) {
 
     // State vars
     const [isUserActive, setIsUserActive] = useState(false)
+    const [senToUserChat, setSenToUserChat] = useState(null)
 
     // Import Store component to get the setTo user status
-    const { getUserStatus } = Store()
+    const { getUserStatus, getChat } = Store()
 
     // get senTo user status
     useEffect(() => {
         getUserStatus(senToMember.id, setIsUserActive)
+    }, [])
+
+    // get the senTo user chat lastMsgSeen
+    useEffect(() => {
+        db.collection("members")
+            .doc(senToMember.id)
+            .collection("chats")
+            .doc(chatDocId)
+            .onSnapshot(snapshot => {
+                setSenToUserChat(snapshot.data()?.lastMsgSeen)
+            })
     }, [])
 
     // avatar badge props
@@ -83,13 +100,16 @@ function ChatItem({ chat, authUserId, chatDocId }) {
         let res
         // check if you own the last message
         if (lastMsg.id == authUserId) {
-            res = <span><span className="text">{text}</span> <FiberManualRecord fontSize='small' /> You</span>
+            res = <span><span className={clsx("text")}>{text}</span> <FiberManualRecord fontSize='small' /> You</span>
         } else {
             res = <span><span className="text">{text}</span></span>
         }
 
         return res
     }
+
+    // Have I seen the lastMsg
+    const haveLastMsgSeen = (chat.lastMsg.id != authUserId) && !senToUserChat
 
     return (
         <ListItem
@@ -109,7 +129,10 @@ function ChatItem({ chat, authUserId, chatDocId }) {
             {/* To edited with an advanced algorithm */}
             <ListItemText
                 primary={senToMember.username}
-                secondaryTypographyProps={{ className: classes.chatAdditionalInfoTypo }}
+                secondaryTypographyProps={{
+                    className: clsx(classes.chatAdditionalInfoTypo,
+                        { "not-seen": haveLastMsgSeen })
+                }}
                 secondary={handleChatAdditionalInfo()} />
         </ListItem>
     )

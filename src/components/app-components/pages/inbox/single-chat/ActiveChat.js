@@ -26,7 +26,7 @@ function ActiveChat() {
             // the extra 10px to fully see the send message form
             // layout.header.mobile.height for the bottom bar
             [theme.breakpoints.down("sm")]: {
-                height: `calc(100vh - ${layout.header.mobile.height}px - 10px)`,
+                height: `calc(100vh - ${layout.header.mobile.height}px - 40px)`, /* 40px for the mobile browser header */
             }
         },
     }))
@@ -63,7 +63,7 @@ function ActiveChat() {
     if (chat == null) return null
 
     // Get some info
-    const senToMember = chat?.members.find(member => member.id != loggedUser.uid)
+    const senToMember = chat.members.find(member => member.id != loggedUser.uid)
 
 
     // Chat header props
