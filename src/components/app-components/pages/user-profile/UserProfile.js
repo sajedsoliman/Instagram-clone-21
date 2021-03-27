@@ -29,7 +29,7 @@ function UserProfile() {
 
     // Fetch the user from database according to their username
     useEffect(() => {
-        db
+        let unsubscribe = db
             .collection("members")
             .where("username", "==", username)
             .onSnapshot(value => {
@@ -41,6 +41,11 @@ function UserProfile() {
                     setUser({ ...value.docs[0].data(), id: value.docs[0].id })
                 }
             })
+
+        // clean up the before user
+        return () => {
+            unsubscribe()
+        }
     }, [username])
 
     if (user == null) return null

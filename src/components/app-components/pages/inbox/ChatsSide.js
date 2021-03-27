@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
 
 
 
-function ChatsSide() {
+function ChatsSide({ handleCLoseDetails }) {
     const loggedUser = AuthedUser()
     const classes = useStyles()
 
@@ -59,7 +59,7 @@ function ChatsSide() {
     const mappedChats = chats.map(chatDoc => {
         const { id, chat } = chatDoc
 
-        return <ChatItem key={id} chat={chat} chatDocId={id} authUserId={loggedUser.uid} />
+        return <ChatItem key={id} handleCLoseDetails={handleCLoseDetails} chat={chat} chatDocId={id} authUserId={loggedUser.uid} />
     })
 
     return (

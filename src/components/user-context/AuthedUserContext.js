@@ -38,7 +38,7 @@ export function AuthedUserProvider({ children }) {
         })
     }, [])
 
-    if (authUser == null) return null
+    if (authUser == null || authUser == undefined) return null
     return (
         <AuthedUserContext.Provider value={authUser}>
             {children}

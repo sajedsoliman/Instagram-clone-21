@@ -12,7 +12,11 @@ import UserPost from '../../../common-components/post-components/UserPost'
 const useStyles = makeStyles(theme => ({
     wrapper: {
         marginTop: 25,
-        paddingBottom: 100
+        paddingBottom: 100,
+
+        [theme.breakpoints.down("xs")]: {
+            padding: "0 15px 100px"
+        }
     },
     title: {
         marginBottom: 10

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useHistory } from "react-router";
 
 // Firebase imports
 import { db, auth, storage, firebase, admin } from "./database";
@@ -20,6 +21,9 @@ function Store() {
     // For notification
     const processSettings = useAlert()
     const loggedUser = AuthedUser()
+
+    // Router
+    const history = useHistory()
 
     // State vars
     const [loading, setLoading] = useState(false)
@@ -59,6 +63,38 @@ function Store() {
             })
     }
 
+    // Handle signIn the user
+    const handleSignIn = async (isEmail, password, loginInput, signInCallback, from) => {
+        let finalEmail = loginInput
+
+        // check if the user wanna login with username
+        if (!isEmail) {
+            // Check in database if the user exists or not
+            finalEmail = db
+                .collection("members")
+                .where("username", "==", loginInput)
+                .get()
+                .then(snapshot => {
+                    if (snapshot.empty) {
+                        // the user doesn't exist
+                        // so pop an alert to tell them
+                        processSettings("error", "User doesn't exist")
+                    } else {
+                        return snapshot.docs[0].data().email
+                    }
+                })
+        }
+
+        auth.signInWithEmailAndPassword(await finalEmail, password)
+            .then(authedUser => {
+                signInCallback()
+
+                history.replace(from.pathname, { user: true })
+            })
+            .catch(err => processSettings("error", err.message))
+    }
+
+
     // handle sign up user
     const signUpUserWithEmail = async (user, avatarUrl, callback) => {
         // Destructuring the user
@@ -96,7 +132,6 @@ function Store() {
                 .catch(err => processSettings("error", err.message))
         }
     }
-
 
     // handle add the user to database
     const AddUserToDB = (user, id, avatarUrl) => {
@@ -142,20 +177,30 @@ function Store() {
     }
 
     // Update user
-    const updateUser = (id, newValue) => {
+    const updateUser = (userNew) => {
         // Check if the user hasn't changed their info to avoid going to the database
-        const isChanged = loggedUser == newValue
+        const isChanged = loggedUser == userNew
         if (!isChanged) {
             db.collection("members")
-                .doc(id)
+                .doc(userNew.id)
                 .update({
-                    ...newValue
+                    ...userNew
                 })
                 .then(success => processSettings("success", "User updated."))
                 .catch(err => processSettings("error", err.message))
         } else {
             processSettings("warning", "Change something to submit")
         }
+    }
+
+    // Get any user
+    const getUser = (userId, setUser) => {
+        db
+            .collection("members")
+            .doc(userId)
+            .onSnapshot(snapshot => {
+                setUser(snapshot.data())
+            })
     }
 
     // update password
@@ -187,7 +232,6 @@ function Store() {
                 setComments(snapshot.docs.map(doc => ({ ...doc.data() })))
             })
     }
-
 
     // get user followers
     const getUserFollowers = (userId, setFollowers) => {
@@ -316,17 +360,27 @@ function Store() {
             })
     }
 
-    // handle fetching a single chat
+    // handle fetching a single chat - just for showing chats, not for general use
+    // to handle see the last message
     const getChat = (userId, chatId, setChat) => {
         db.collection("members")
             .doc(userId)
             .collection("chats")
             .doc(chatId)
             .onSnapshot(snapshot => {
+                // Because the listener will keep working, we need to prevent it from updating
+                // therefore I will see the last message without seeing it
+                // I will fix when I learn to stop these listener
                 if (window.location.pathname != `/direct/inbox/t/${chatId}`) return
 
                 setChat(snapshot.exists ? { ...snapshot.data() } : null)
 
+                // handle update the seen status for the logged user
+                snapshot.ref.update({
+                    seen: true
+                })
+
+                // handle see the other user message
                 if (snapshot.data().lastMsg.id != userId) {
                     const senToUser = snapshot.data().members.find(member => member.id != userId)
                     db.collection("members")
@@ -334,7 +388,7 @@ function Store() {
                         .collection("chats")
                         .doc(chatId)
                         .update({
-                            lastMsgSeen: true
+                            lastMsgSeen: true,
                         })
                 }
             })
@@ -342,152 +396,26 @@ function Store() {
 
     // handle putting a listener on a user's chat messages
     const getChatMessages = (userId, chatId, setMessages) => {
-        db.collection("members")
+        // unsubscribe to stop the listener each time we open another chat
+        let unsubscribe = db.collection("members")
             .doc(userId)
             .collection("chats")
             .doc(chatId)
             .collection("messages")
             .orderBy("sendDate", "asc")
             .onSnapshot(snapshot => {
-                console.log("Here")
                 const messages = snapshot.docs.map(doc => ({ id: doc.id, message: doc.data() }))
                 setMessages(messages)
             })
-    }
 
-    // handle send a message to both of two members
-    const handleSendMessage = (chatId, loggedUserId, senderName, senToId, msgText) => {
-        // Send the message first so it arrives faster
-        // message object
-        const messageObj = {
-            senderId: loggedUserId,
-            body: msgText,
-            sendDate: firebase.firestore.FieldValue.serverTimestamp(),
-            sender: senderName
-        }
-
-        // handle add the message to loggedUser chat
-        // Send the message first
-        db
-            .collection("members")
-            .doc(loggedUserId)
-            .collection("chats")
-            .doc(chatId)
-            .collection("messages")
-            .add(messageObj)
-
-        // handle the chat's last msg seen
-        db
-            .collection("members")
-            .doc(loggedUserId)
-            .collection("chats")
-            .doc(chatId)
-            .update({
-                lastMsgSeen: false
-            })
-
-        // handle add the message to SenTo chat
-        db.collection("members")
-            .doc(senToId)
-            .collection("chats")
-            .doc(chatId)
-            .get()
-            .then(chatDoc => {
-                if (chatDoc.data() == undefined) {
-                    // Create a new chat to the senTo user
-                    createChatForSenToUser(senToId, chatId)
-
-                    // then add the message
-                    chatDoc
-                        .ref
-                        .collection("messages")
-                        .add(messageObj)
-                } else {
-                    // just send the message cuz the user has the chat
-                    chatDoc
-                        .ref
-                        .collection("messages")
-                        .add(messageObj)
-                }
-            })
-
-
-        // handle update the chat's last message
-        // For the logged user
-        const lastMsg = {
-            id: loggedUserId,
-            text: msgText,
-            sendDate: firebase.firestore.FieldValue.serverTimestamp()
-        }
-        db.collection("members")
-            .doc(loggedUserId)
-            .collection("chats")
-            .doc(chatId)
-            .update({
-                lastMsg: { ...lastMsg }
-            })
-
-        // For the senTo user
-        db.collection("members")
-            .doc(senToId)
-            .collection("chats")
-            .doc(chatId)
-            .update({
-                lastMsg: { ...lastMsg }
-            })
-    }
-
-    // get the senTo user status (active or not)
-    const getUserStatus = (userId, setUserStatus) => {
-        db.collection("members")
-            .doc(userId)
-            .get()
-            .then(user => {
-                setUserStatus(user.data().active)
-            })
-    }
-
-    // handle chat mute
-    const toggleChatMute = (chatId, newValue) => {
-        // handle mute the chat just at the user who wanna mute it 
-        db.collection("members")
-            .doc(loggedUser.uid)
-            .collection("chats")
-            .doc(chatId)
-            .update({
-                isMuted: newValue
-            })
-    }
-
-    // handle delete one-side chat (for just one user (logged user))
-    const deleteChat = (chatId) => {
-        // Delete the chat messages before delete the parent chat
-        db.collection("members")
-            .doc(loggedUser.uid)
-            .collection("chats")
-            .doc(chatId)
-            .collection("messages")
-            .get()
-            .then(snapshot => {
-                // Delete all messages - loop cuz we can't delete collections in firebase with code (just manually)
-                snapshot.forEach(doc => {
-                    doc.ref.delete()
-                })
-
-                // then delete the entire chat
-                db.collection("members")
-                    .doc(loggedUser.uid)
-                    .collection("chats")
-                    .doc(chatId)
-                    .delete()
-            })
+        return unsubscribe
     }
 
     // handle create a new chat if one-side of users have chat with the other - for the senToUser
-    const createChatForSenToUser = (userId, chatId) => {
+    const createChatForSenToUser = (userId, chatId, lastMsg) => {
         const chatObj = {
             isMuted: false,
-            lastMsg: {},
+            lastMsg,
             members: [
                 {
                     id: userId,
@@ -542,6 +470,132 @@ function Store() {
             return chatId
         }
 
+    }
+
+    // handle send a message to both of two members
+    const handleSendMessage = (chatId, loggedUserId, senderName, senToId, msgText) => {
+        // Send the message first so it arrives faster
+        // message object
+        const messageObj = {
+            senderId: loggedUserId,
+            body: msgText,
+            sendDate: firebase.firestore.FieldValue.serverTimestamp(),
+            sender: senderName
+        }
+
+        // last message object
+        const lastMsg = {
+            id: loggedUserId,
+            text: msgText,
+            sendDate: firebase.firestore.FieldValue.serverTimestamp()
+        }
+
+        // handle add the message to loggedUser chat
+        // Send the message first
+        db
+            .collection("members")
+            .doc(loggedUserId)
+            .collection("chats")
+            .doc(chatId)
+            .collection("messages")
+            .add(messageObj)
+
+        // handle add the message to SenTo chat
+        db.collection("members")
+            .doc(senToId)
+            .collection("chats")
+            .doc(chatId)
+            .get()
+            .then(chatDoc => {
+                if (chatDoc.data() == undefined) {
+                    // Create a new chat to the senTo user
+                    // set the last message when create the chat first time
+                    // In the function (createChatForSenToUser) the last message was empty
+                    // but now it doesn't empty
+                    createChatForSenToUser(senToId, chatId, lastMsg)
+
+                    // then add the message
+                    chatDoc
+                        .ref
+                        .collection("messages")
+                        .add(messageObj)
+                } else {
+                    // just send the message cuz the user has the chat
+                    chatDoc
+                        .ref
+                        .collection("messages")
+                        .add(messageObj)
+                }
+            })
+
+
+        // handle update the chat's last message and the last message seen
+
+        // For the logged user 
+        db.collection("members")
+            .doc(loggedUserId)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                lastMsg: { ...lastMsg },
+                lastMsgSeen: false
+            })
+
+        // For the senTo user
+        db.collection("members")
+            .doc(senToId)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                lastMsg: { ...lastMsg },
+                seen: false
+            })
+    }
+
+    // get the senTo user status (active or not)
+    const getUserStatus = (userId, setUserStatus) => {
+        db.collection("members")
+            .doc(userId)
+            .get()
+            .then(user => {
+                setUserStatus(user.data().active)
+            })
+    }
+
+    // handle chat mute
+    const toggleChatMute = (chatId, newValue) => {
+        // handle mute the chat just at the user who wanna mute it 
+        db.collection("members")
+            .doc(loggedUser.uid)
+            .collection("chats")
+            .doc(chatId)
+            .update({
+                isMuted: newValue
+            })
+    }
+
+    // handle delete one-side chat (for just one user (logged user))
+    const deleteChat = (chatId) => {
+        // Delete the chat messages before delete the parent chat
+        db.collection("members")
+            .doc(loggedUser.uid)
+            .collection("chats")
+            .doc(chatId)
+            .collection("messages")
+            .get()
+            .then(snapshot => {
+                // Delete all messages - loop cuz we can't delete collections in firebase with code (just manually)
+                snapshot.forEach(doc => {
+                    doc.ref.delete()
+                })
+
+                // then delete the entire chat
+                db.collection("members")
+                    .doc(loggedUser.uid)
+                    .collection("chats")
+                    .doc(chatId)
+                    .delete()
+            })
     }
 
     // handle create a new chat when click on message button in the profile or from that dialog if I add it later
@@ -622,8 +676,23 @@ function Store() {
             })
     }
 
+    // Get any chat - just its info
+    const handleGetChat = (chatId, userId, setChat) => {
+        db.collection("members")
+            .doc(userId)
+            .collection("chats")
+            .doc(chatId)
+            // to listen for each chat's changes
+            .onSnapshot(snapshot => {
+                setChat(snapshot.data())
+            })
+    }
+
+
+
     return {
         posts,
+        getUser,
         getSuggestedPosts,
         updateUser,
         updatePassword,
@@ -650,6 +719,8 @@ function Store() {
         getPostComments,
         handleLastMsgSeen,
         handleOtherUserTyping,
+        handleGetChat,
+        handleSignIn,
         loading,
     }
 }

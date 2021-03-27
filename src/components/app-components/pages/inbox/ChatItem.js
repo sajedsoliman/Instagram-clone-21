@@ -44,14 +44,13 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-function ChatItem({ chat, authUserId, chatDocId }) {
+function ChatItem({ chat, authUserId, chatDocId, handleCLoseDetails }) {
     const classes = useStyles()
 
     // destructuring the chat
     const { lastMsg, members } = chat
 
     // Router
-    const location = useLocation()
 
     // Get some info
     const senToMember = members.find(member => member.id != authUserId)
@@ -61,7 +60,7 @@ function ChatItem({ chat, authUserId, chatDocId }) {
     const [senToUserChat, setSenToUserChat] = useState(null)
 
     // Import Store component to get the setTo user status
-    const { getUserStatus, getChat } = Store()
+    const { getUserStatus, handleGetChat } = Store()
 
     // get senTo user status
     useEffect(() => {
@@ -70,13 +69,7 @@ function ChatItem({ chat, authUserId, chatDocId }) {
 
     // get the senTo user chat lastMsgSeen
     useEffect(() => {
-        db.collection("members")
-            .doc(senToMember.id)
-            .collection("chats")
-            .doc(chatDocId)
-            .onSnapshot(snapshot => {
-                setSenToUserChat(snapshot.data()?.lastMsgSeen)
-            })
+        handleGetChat(chatDocId, senToMember.id, setSenToUserChat)
     }, [])
 
     // avatar badge props
@@ -109,10 +102,12 @@ function ChatItem({ chat, authUserId, chatDocId }) {
     }
 
     // Have I seen the lastMsg
-    const haveLastMsgSeen = (chat.lastMsg.id != authUserId) && !senToUserChat
+    const haveLastMsgSeen = (chat.lastMsg.id != authUserId) && !(senToUserChat?.lastMsgSeen)
 
     return (
         <ListItem
+            // Close details up when click on item
+            onClick={() => handleCLoseDetails()}
             button to={{
                 pathname: `/direct/inbox/t/${chatDocId}`, ...(window.innerWidth < 960 ? {
                     state: {

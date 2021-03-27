@@ -1,9 +1,9 @@
-import { Link as RouterLink } from 'react-router-dom'
-import { useState } from 'react'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import clsx from "clsx"
 
 // Material-UI imports
-import { Divider } from '@material-ui/core'
+import { Badge, Divider } from '@material-ui/core'
 import makeStyles from "@material-ui/core/styles/makeStyles"
 import Link from "@material-ui/core/Link"
 import Avatar from "@material-ui/core/Avatar"
@@ -24,6 +24,7 @@ import LoggedUserAction from '../../app-components/header/LoggedUserAction'
 import PopUp from '../PopUp'
 import LoginForm from '../../app-components/forms/LoginForm'
 import RegisterForm from '../../app-components/forms/RegisterForm'
+import Store from '../firebase/Store'
 
 // Hooks
 import useWindowWidth from '../../common-components/hooks/useWindowWidth'
@@ -86,10 +87,21 @@ const useStyles = makeStyles((theme) => ({
 export default function Nav({ navClassName }) {
     const user = AuthedUser()
 
+    // Router
+    const location = useLocation()
+
     // State vars
     const [anchorEl, setAnchorEl] = useState(null)
     const [loginModal, setLoginModal] = useState({ title: null, isOpen: false })
     const [registerModal, setRegisterModal] = useState({ title: null, isOpen: false })
+    const [chats, setChats] = useState([])
+
+    // a Listener to listen the user chats' changes
+    useEffect(() => {
+        if (user != null && user != "no user") {
+            getUserChats(user.id, setChats)
+        }
+    }, [])
 
     const handleLoginModalOpen = () => {
         setLoginModal(prev => ({
@@ -102,7 +114,6 @@ export default function Nav({ navClassName }) {
             ...prev, isOpen: true
         }))
     }
-
 
     const handleLoginModalClose = () => {
         setLoginModal(prev => ({
@@ -132,6 +143,11 @@ export default function Nav({ navClassName }) {
         // close the menu when logout
         handleCloseMenu()
 
+        // empty the location state
+        if (location.state && location.state.user) {
+            location.state.user = false
+        }
+
         // update user's active state to false
         db.collection("members")
             .doc(user.uid)
@@ -151,6 +167,14 @@ export default function Nav({ navClassName }) {
         component: RouterLink,
         onClick: handleCloseMenu
     }
+
+    // Import Store component to get chats
+    const { getUserChats } = Store()
+
+    // Check if there any unread messages
+    const isThereUnreadMessages = chats.some(chat => {
+        return !chat.chat.seen
+    })
 
     return (
         <nav className={clsx(classes.linkNav, navClassName)}>
@@ -172,7 +196,10 @@ export default function Nav({ navClassName }) {
                             </>
                         )}
                         <Link to="/direct/inbox" component={RouterLink}>
-                            <InboxIcon />
+                            <Badge variant="dot" overlap="circle" color="secondary"
+                                invisible={!isThereUnreadMessages}>
+                                <InboxIcon />
+                            </Badge>
                         </Link>
                         <Link to="/" >
                             <FavoriteBorderIcon />

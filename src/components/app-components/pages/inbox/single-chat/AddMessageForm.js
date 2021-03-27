@@ -58,7 +58,8 @@ function AddMessageForm({ chatId, senToId, loggedUserId, chatTyping }) {
     const loggedUser = AuthedUser()
 
     // Refs
-    const audioRef = useRef()
+    const typingAudioRef = useRef()
+    const newMessageAudioRef = useRef()
 
     // State vars
     const [messageText, setMessageText] = useState("")
@@ -66,14 +67,14 @@ function AddMessageForm({ chatId, senToId, loggedUserId, chatTyping }) {
     // Import Store component
     const { handleSendMessage, handleOtherUserTyping } = Store()
 
+    // To listen to other user typing
     useEffect(() => {
         if (chatTyping) {
-            audioRef.current.play()
+            typingAudioRef.current.play()
         }
         else
-            audioRef.current.pause()
+            typingAudioRef.current.pause()
     }, [chatTyping])
-
 
     // Listener for other user typing
     useEffect(() => {
@@ -95,6 +96,9 @@ function AddMessageForm({ chatId, senToId, loggedUserId, chatTyping }) {
 
         // Handle add it to db
         handleSendMessage(chatId, loggedUserId, loggedUser.username, senToId, messageText)
+
+        // Play some audio
+        // newMessageAudioRef.current.play()
     }
 
     return (
@@ -123,7 +127,10 @@ function AddMessageForm({ chatId, senToId, loggedUserId, chatTyping }) {
             </form>
 
             {/* audio for typing */}
-            <audio ref={audioRef} src="https://firebasestorage.googleapis.com/v0/b/insta-clone-2-4dd4b.appspot.com/o/typing-audio.mp3?alt=media&token=5f88dc3d-1fbc-4145-a092-625b1b3a86da"></audio>
+            <audio ref={typingAudioRef} src="https://firebasestorage.googleapis.com/v0/b/insta-clone-2-4dd4b.appspot.com/o/typing-audio.mp3?alt=media&token=5f88dc3d-1fbc-4145-a092-625b1b3a86da"></audio>
+
+            {/* audio for a new message from the logged user */}
+            <audio ref={newMessageAudioRef} src="https://firebasestorage.googleapis.com/v0/b/insta-clone-2-4dd4b.appspot.com/o/10convert.com_Facebook-messager-Sound-Effect-New-2020-Sound-For-free-Download-Now_9Y0D9zkAvzM%20(1).mp3?alt=media&token=c9d8b56a-7dac-4888-a2a6-44ff71946ec5"></audio>
         </CardActions>
     )
 }

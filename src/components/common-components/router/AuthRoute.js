@@ -11,8 +11,9 @@ function AuthRoute({ children, ...other }) {
     const user = AuthedUser()
 
     return (
-        <Route {...other} render={({ location }) =>
-            !(user == "no user") || location.state?.user ? (
+        <Route {...other} render={({ location }) => {
+            const isUser = location.state && location.state.user
+            return !(user == "no user") || isUser ? (
                 children
             ) : (
                 <Redirect to={{
@@ -20,7 +21,7 @@ function AuthRoute({ children, ...other }) {
                     state: { from: location }
                 }} />
             )
-        } />
+        }} />
     )
 }
 

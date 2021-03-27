@@ -48,7 +48,8 @@ function UserForm(props) {
     const processSettings = useAlert()
 
     // destructuring props
-    const { user, handleChange: handleInputsChange, action, actionHandler, validationErrors,
+    const { user,
+        handleChange: handleInputsChange, action, actionHandler, validationErrors,
         avatarLoadingProgress } = props
 
     // handle add avatar
@@ -84,28 +85,38 @@ function UserForm(props) {
 
             {action == "register" && (
                 // Merge between full name and avatar in a good shape
-                <Grid container alignItems="center" spacing={2}>
-                    <Grid item xs={8}>
-                        <Controls.TextInput
-                            validationError={validationErrors.fullName}
-                            {...inputCommonProps("Full Name", "fullName", user.fullName)} />
+                <>
+                    <Grid container alignItems="center" spacing={2}>
+                        <Grid item xs={8}>
+                            <Controls.TextInput
+                                validationError={validationErrors.fullName}
+                                {...inputCommonProps("Full Name", "fullName", user.fullName)} />
+                        </Grid>
+                        <Grid item xs={4} justify="center" style={{ display: "flex" }}>
+                            {/* handleUploadAvatar(file.file) */}
+                            <Controls.FilePondCircular
+                                addFileHandle={(err, file) => handleAddAvatar(file.file)}
+                                rootClassName={classes.filePondRoot}
+                                label="Your Image"
+                                size="small"
+                            />
+                        </Grid>
                     </Grid>
-                    <Grid item xs={4} justify="center" style={{ display: "flex" }}>
-                        {/* handleUploadAvatar(file.file) */}
-                        <Controls.FilePondCircular
-                            addFileHandle={(err, file) => handleAddAvatar(file.file)}
-                            rootClassName={classes.filePondRoot}
-                            label="Your Image"
-                            size="small"
-                        />
-                    </Grid>
-                </Grid>
+
+                    {/* Email input - for just register */}
+                    <Controls.TextInput
+                        validationError={validationErrors.email}
+                        {...inputCommonProps("Email Address", "email", user.email)} />
+                </>
             )}
 
-            {/* Email input */}
-            <Controls.TextInput
-                validationError={validationErrors.email}
-                {...inputCommonProps("Email Address", "email", user.email)} />
+            {/* Input for email or username */}
+            {
+                action == "login" && (
+                    <Controls.TextInput
+                        {...inputCommonProps("Email or Username", "loginInput", user.loginInput)} />
+                )
+            }
 
             {/* Username input */}
             { action == "register" && (

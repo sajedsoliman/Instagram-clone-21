@@ -87,6 +87,7 @@ function UserSettings() {
         )
     }
 
+    if (loggedUser == "no user") return null
     return (
         <AppPage>
             <Container maxWidth="md">

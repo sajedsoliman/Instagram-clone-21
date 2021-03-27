@@ -68,10 +68,15 @@ function ChatMessages({ chatId, userId, senToMember, chat }) {
 
     // put a listener on messages' collection
     useEffect(() => {
+        let unsubscribe
         if (userId) {
             // put a listener on messages
-            console.log("here")
-            getChatMessages(userId, chatId, setMessages)
+            unsubscribe = getChatMessages(userId, chatId, setMessages)
+        }
+
+        // To stop the listener
+        return () => {
+            unsubscribe()
         }
     }, [chatId])
 

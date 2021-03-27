@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 export default function SearchBox(props) {
-    // get the input ref to ... 
+    // get the input ref to make it as an anchor for popups(search results popup)
     const { value, handleChange, inputRef, className, ...others } = props
     const classes = useStyles()
 

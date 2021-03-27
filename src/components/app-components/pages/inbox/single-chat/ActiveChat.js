@@ -15,7 +15,7 @@ import ChatHeader from './ChatHeader'
 import ChatMessages from './ChatMessages'
 import ChatDetails from './ChatDetails'
 
-function ActiveChat() {
+function ActiveChat({ details, toggleDetailsHandler }) {
     const layout = Layout()
 
     // Styles
@@ -39,15 +39,6 @@ function ActiveChat() {
 
     // Router
     const { chatId } = useParams()
-
-    // State vars
-    const [details, setDetails] = useState(false)
-
-
-    // handel toggle chat details
-    const toggleDetailsHandler = () => {
-        setDetails(!details)
-    }
 
     // Import Store component to handle fetching the chat
     const { getChat } = Store()
@@ -80,7 +71,10 @@ function ActiveChat() {
                 details ? (
                     <ChatDetails senToMember={senToMember} chatId={chatId} chat={chat} />
                 ) : (
-                    <ChatMessages chat={chat} senToMember={senToMember} chatId={chatId} userId={loggedUser.uid} />
+                    <ChatMessages chat={chat}
+                        senToMember={senToMember}
+                        chatId={chatId}
+                        userId={loggedUser.uid} />
                 )
             }
         </Grid>

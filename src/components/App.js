@@ -179,20 +179,16 @@ export default function App() {
                             }
 
                             {/* Add post button for desktop */}
-                            {loggedUser != "no user" && (
-                                <>
-                                    <Fab
-                                        className={classes.addPostBtn}
-                                        color="secondary"
-                                        component={RouterLink}
-                                        to="/add-post">
-                                        <PostAdd />
-                                    </Fab>
+                            <Fab
+                                className={classes.addPostBtn}
+                                color="secondary"
+                                component={RouterLink}
+                                to="/add-post">
+                                <PostAdd />
+                            </Fab>
 
-                                    {/* Mobile DownBar */}
-                                    <MobileBottomBar />
-                                </>
-                            )}
+                            {/* Mobile DownBar */}
+                            <MobileBottomBar />
                         </LayoutContextProvider>
                     </AuthedUserProvider>
                 </NotificationContext>

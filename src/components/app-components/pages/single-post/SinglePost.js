@@ -12,6 +12,14 @@ import UserSuggestedPosts from './UserSuggestedPosts'
 
 // styles
 const useStyles = makeStyles(theme => ({
+    [theme.breakpoints.down("xs")]: {
+        container: {
+            padding: 0
+        },
+        page: {
+            paddingTop: "0"
+        }
+    }
 }))
 
 function SinglePost() {
@@ -36,8 +44,8 @@ function SinglePost() {
     else {
         if (post == "not exist") return null
         return (
-            <AppPage>
-                <Container maxWidth="md">
+            <AppPage additionalClass={classes.page}>
+                <Container className={classes.container} maxWidth="md">
                     {/* full screen post */}
                     <FullScreenPost post={post} postId={postId} />
 

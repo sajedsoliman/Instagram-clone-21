@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Material-UI Imports
 import { makeStyles, Typography } from '@material-ui/core'
@@ -37,9 +37,21 @@ function EditProfile() {
     const classes = useStyles()
     const loggedUser = AuthedUser()
 
+    // import update user method and the user info from Store component
+    const { updateUser, getUser } = Store()
+
     // State vars
     // put the change image profile modal here -> to handle it from other places (not just by avatar image)
     const [modalInfo, setModalInfo] = useState({ isOpen: false, title: "Change Profile Image" })
+    // get the user from the db
+    const [loggedUserInfo, setLoggedUserInfo] = useState(null)
+
+    // listen for user changes
+    useEffect(() => {
+        getUser(loggedUser.id, setLoggedUserInfo)
+    }, [])
+
+    if (loggedUserInfo == null) return null
 
     // destructuring useForm
     const {
@@ -47,7 +59,7 @@ function EditProfile() {
         inputCommonProps,
         validationErrors,
         setErrors
-    } = useForm(loggedUser, false, validation)
+    } = useForm(loggedUserInfo, false, validation)
 
     // handle toggle change avatar modal
     const handleModalOpen = () => {
@@ -77,13 +89,10 @@ function EditProfile() {
         </div>
     )
 
-    // import update user method from Store component
-    const { updateUser } = Store()
-
     // handle update user (submit form)
     const handleSubmitForm = () => {
         if (validation(user, setErrors)) {
-            updateUser(user.id, user)
+            updateUser(user)
         }
     }
 
