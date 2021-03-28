@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useHistory, useLocation } from 'react-router-dom'
 
 // material-ui imports
@@ -7,6 +8,10 @@ import { Button, makeStyles } from "@material-ui/core"
 import { useForm } from "../../common-components/useForm"
 import UserForm from "../../common-components/user-related/UserForm"
 import Store from "../../common-components/firebase/Store"
+import GoogleComplete from './GoogleComplete'
+
+// Utilities
+import IF from '../../common-components/utilities/IF'
 
 // Service
 import { auth, firebase } from '../../common-components/firebase/database'
@@ -28,6 +33,11 @@ function LoginForm({ handleLoginModalClose }) {
     const history = useHistory()
     const location = useLocation()
     const from = location.state?.from || { pathname: "/" }
+
+    // State vars
+    const [googleLastStep, setGoogleLastStep] = useState(false)
+    const [googleAuthUser, setGoogleAuthUser] = useState(null)
+
     // import useForm things
     const {
         values: user,
@@ -35,24 +45,28 @@ function LoginForm({ handleLoginModalClose }) {
         validationErrors
     } = useForm(userInitialValues, false)
 
+    // Import Store component to check the ability and to sign in users
+    const { isUserExisted, handleSignIn } = Store()
+
     // Login with google
     const handleSignInWithGoogle = () => {
         const provider = new firebase.auth.GoogleAuthProvider()
 
         auth.signInWithPopup(provider)
-            .then(authUser => {
-                if (typeof (handleLoginModalClose) == "function") {
-                    handleLoginModalClose()
+            .then(async authUser => {
+                // Check if the user is already existed or not
+                if (await isUserExisted(authUser.user.uid)) {
+                    if (typeof (handleLoginModalClose) == "function") {
+                        handleLoginModalClose()
+                    }
+
+                    history.replace(from, { user: true })
+                } else {
+                    setGoogleAuthUser(authUser.user)
+                    setGoogleLastStep(true)
                 }
-
-                history.replace(from)
-            }).catch(err => {
-                window.location = "/"
-            })
+            }).catch(err => alert(err.message))
     }
-
-    // Import Store component to sign in users
-    const { handleSignIn } = Store()
 
     // Handle login with either email or username
     const handleSignInWithPasswordAndEmail = () => {
@@ -72,14 +86,21 @@ function LoginForm({ handleLoginModalClose }) {
         }
     }
 
-    return (
-        <div>
-            <UserForm validationErrors={validationErrors} user={user}
-                actionHandler={handleSignInWithPasswordAndEmail} handleChange={handleInputsChange} action={"login"} />
+    // Google last step component
+    const googleLastStepRender = (
+        <GoogleComplete authUser={googleAuthUser} closeDialog={handleLoginModalClose} />
+    )
 
-            {/* <Button className={classes.googleSignUpBtn} fullWidth onClick={handleSignInWithGoogle} variant="contained" color="default" startIcon={<i className="fab fa-google" />
-            }>Login With Google</Button> */}
-        </div>
+    return (
+        <IF condition={!googleLastStep} elseChildren={googleLastStepRender}>
+            <div>
+                <UserForm validationErrors={validationErrors} user={user}
+                    actionHandler={handleSignInWithPasswordAndEmail} handleChange={handleInputsChange} action={"login"} />
+
+                <Button className={classes.googleSignUpBtn} fullWidth onClick={handleSignInWithGoogle} variant="contained" color="default" startIcon={<i className="fab fa-google" />}>
+                    Login With Google</Button>
+            </div>
+        </IF>
     )
 }
 

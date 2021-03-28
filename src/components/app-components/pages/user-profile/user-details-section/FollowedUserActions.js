@@ -64,7 +64,8 @@ function FollowedUserActions({ user }) {
     const HandleCreateChat = async () => {
         // Check if the user has a chat with the user in this profile
         // go to the chat id (either it's now or already exists)
-        history.push(`direct/inbox/t/${await createChat(user)}`, (windowWidth < 960 ? { mobile: true } : {}))
+        history.push(`direct/inbox/t/${await createChat(user)}`,
+            (windowWidth < 960 ? { mobile: true } : {}))
 
     }
 

@@ -8,6 +8,28 @@
     outline: none;
 }
 
+.image-gallery-fullscreen-button,
+.image-gallery-fullscreen-button:focus
+{
+    outline: none;
+}
+
+.image-gallery-fullscreen-button svg {
+    height: 24px !important;
+    width: 24px !important;
+}
+
+.image-gallery-fullscreen-button svg:focus {
+    outline: none;
+}
+
+
+/* disable fullscreen button on desktop */
+@media (min-width: 700px) {
+    .image-gallery-fullscreen-button {
+        display: none;
+    }
+}
 
 .image-gallery-container .image-gallery-content .image-gallery-index {
     background: rgb(47 47 47);

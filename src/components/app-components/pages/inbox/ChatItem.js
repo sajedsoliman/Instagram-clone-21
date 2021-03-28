@@ -48,7 +48,7 @@ function ChatItem({ chat, authUserId, chatDocId, handleCLoseDetails }) {
     const classes = useStyles()
 
     // destructuring the chat
-    const { lastMsg, members } = chat
+    const { lastMsg, members, seen } = chat
 
     // Router
 
@@ -57,19 +57,13 @@ function ChatItem({ chat, authUserId, chatDocId, handleCLoseDetails }) {
 
     // State vars
     const [isUserActive, setIsUserActive] = useState(false)
-    const [senToUserChat, setSenToUserChat] = useState(null)
 
     // Import Store component to get the setTo user status
-    const { getUserStatus, handleGetChat } = Store()
+    const { getUserStatus } = Store()
 
     // get senTo user status
     useEffect(() => {
         getUserStatus(senToMember.id, setIsUserActive)
-    }, [])
-
-    // get the senTo user chat lastMsgSeen
-    useEffect(() => {
-        handleGetChat(chatDocId, senToMember.id, setSenToUserChat)
     }, [])
 
     // avatar badge props
@@ -101,9 +95,6 @@ function ChatItem({ chat, authUserId, chatDocId, handleCLoseDetails }) {
         return res
     }
 
-    // Have I seen the lastMsg
-    const haveLastMsgSeen = (chat.lastMsg.id != authUserId) && !(senToUserChat?.lastMsgSeen)
-
     return (
         <ListItem
             // Close details up when click on item
@@ -113,7 +104,7 @@ function ChatItem({ chat, authUserId, chatDocId, handleCLoseDetails }) {
                     state: {
                         mobile: true
                     }
-                } : {})
+                } : {}),
             }} component={RouterLink}>
             <ListItemAvatar>
                 <Badge {...badgeProps}>
@@ -126,7 +117,7 @@ function ChatItem({ chat, authUserId, chatDocId, handleCLoseDetails }) {
                 primary={senToMember.username}
                 secondaryTypographyProps={{
                     className: clsx(classes.chatAdditionalInfoTypo,
-                        { "not-seen": haveLastMsgSeen })
+                        { "not-seen": !seen })
                 }}
                 secondary={handleChatAdditionalInfo()} />
         </ListItem>

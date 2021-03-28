@@ -13,15 +13,15 @@ export function AuthedUserProvider({ children }) {
     const [authUser, setAuthUser] = useState(null)
 
     useEffect(() => {
+        // auth.signOut()
         auth.onAuthStateChanged(authedUser => {
             if (authedUser) {
                 // Destructuring the authed user
                 // update user's active state to true
                 db.collection("members")
                     .doc(authedUser.uid)
-                    .get()
-                    .then(userDoc => {
-                        if (userDoc.exists) {
+                    .onSnapshot(userDoc => {
+                        if (userDoc.exists && authedUser != null) {
                             userDoc.ref.update({
                                 active: true
                             }).then(_ => {

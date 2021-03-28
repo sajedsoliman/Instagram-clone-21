@@ -82,7 +82,9 @@ export default function Header(props) {
                         </Grid>
                         <Grid className={classes.searchContainer} item sm={5}>
                             <Controls.SearchBox {...searchInputProps} />
-                            <SearchResults resetSearch={() => setSearchValue("")} anchorEl={searchInput} searchText={searchValue} />
+                            <SearchResults
+                                resetSearch={() => setSearchValue("")}
+                                anchorEl={searchInput} searchText={searchValue} />
                         </Grid>
                         <Grid item xs={8} sm={5}>
                             <nav className={classes.nav}>

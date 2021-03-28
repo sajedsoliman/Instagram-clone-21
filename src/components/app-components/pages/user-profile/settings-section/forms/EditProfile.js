@@ -38,20 +38,11 @@ function EditProfile() {
     const loggedUser = AuthedUser()
 
     // import update user method and the user info from Store component
-    const { updateUser, getUser } = Store()
+    const { updateUser } = Store()
 
     // State vars
     // put the change image profile modal here -> to handle it from other places (not just by avatar image)
     const [modalInfo, setModalInfo] = useState({ isOpen: false, title: "Change Profile Image" })
-    // get the user from the db
-    const [loggedUserInfo, setLoggedUserInfo] = useState(null)
-
-    // listen for user changes
-    useEffect(() => {
-        getUser(loggedUser.id, setLoggedUserInfo)
-    }, [])
-
-    if (loggedUserInfo == null) return null
 
     // destructuring useForm
     const {
@@ -59,7 +50,7 @@ function EditProfile() {
         inputCommonProps,
         validationErrors,
         setErrors
-    } = useForm(loggedUserInfo, false, validation)
+    } = useForm(loggedUser, false, validation)
 
     // handle toggle change avatar modal
     const handleModalOpen = () => {
@@ -95,6 +86,8 @@ function EditProfile() {
             updateUser(user)
         }
     }
+
+    if (loggedUser == "no user") return null
 
     return (
         <Form>

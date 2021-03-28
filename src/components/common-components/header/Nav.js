@@ -140,6 +140,8 @@ export default function Nav({ navClassName }) {
 
     // handle logout
     const handleLogout = () => {
+        auth.signOut()
+
         // close the menu when logout
         handleCloseMenu()
 
@@ -153,8 +155,6 @@ export default function Nav({ navClassName }) {
             .doc(user.uid)
             .update({
                 active: false
-            }).then(success => {
-                auth.signOut()
             })
     }
 

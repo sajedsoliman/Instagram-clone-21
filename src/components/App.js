@@ -37,6 +37,8 @@ import SearchUser from './app-components/pages/search-user/SearchUser'
 import "normalize.css"
 import "../styles/dist/main.min.css"
 import commonTheme from "./commonTheme"
+import { useEffect, useState } from 'react'
+import { db } from './common-components/firebase/database'
 
 const useStyles = makeStyles(theme => ({
     addPostBtn: {
@@ -63,6 +65,23 @@ export default function App() {
     const location = useLocation()
     const background = location.state && location.state.background
     const mobile = location.state && location.state.mobile
+
+    // State vars
+    const [notifications, setNotifications] = useState([])
+
+    // set a listener for notifications
+    useEffect(() => {
+        // add the listener
+        db.collection("members")
+            .doc("huOhkB7br4flWSzusYYA8JVxU2x1")
+            .collection("notifications")
+            .onSnapshot(snapshot => {
+                const unSeenNotifications = snapshot.docs
+                    .map(doc => ({ id: doc.id, body: doc.data() }))
+                    .filter(alert => alert.body.seen == false)
+                setNotifications(unSeenNotifications)
+            })
+    }, [])
 
     return (
         <div>
@@ -138,14 +157,6 @@ export default function App() {
                                     <Route render={(props) => (
                                         <NotFound />
                                     )} />
-
-                                    {/* 404 page & route */}
-                                    {/* <Route path="/not-found" render={(props) => (
-                                        <NotFound />
-                                    )} /> */}
-
-
-
                                 </Switch>
                             }
 

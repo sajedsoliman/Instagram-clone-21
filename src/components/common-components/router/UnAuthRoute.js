@@ -8,7 +8,7 @@ function UnAuthRoute({ children, ...other }) {
     const loggedUser = AuthedUser()
 
     return (
-        <Route {...other} render={(props) =>
+        <Route {...other} render={({ location }) =>
             loggedUser == "no user" ? (
                 children
             ) : (

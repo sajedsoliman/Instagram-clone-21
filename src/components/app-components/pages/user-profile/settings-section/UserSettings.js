@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useHistory, useParams } from 'react-router'
 
 // Material-UI Imports
@@ -14,6 +14,7 @@ import CustomTabPanel from '../../../../common-components/TabPanel'
 import EditProfile from './forms/EditProfile'
 import { AuthedUser } from '../../../../user-context/AuthedUserContext'
 import ResetPassword from './forms/ResetPassword'
+import Store from '../../../../common-components/firebase/Store'
 
 // utilities
 const tabs = [{ label: "Edit Profile", path: "/accounts/edit" }, { label: "Change Password", path: "/accounts/change_password" }]

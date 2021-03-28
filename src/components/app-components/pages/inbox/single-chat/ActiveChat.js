@@ -45,9 +45,14 @@ function ActiveChat({ details, toggleDetailsHandler }) {
 
     // put a listener on this chat
     useEffect(() => {
+        let unsubscribe;
         // Fetch chat and put a listener
         if (loggedUser && loggedUser.uid) {
-            getChat(loggedUser.uid, chatId, setChat)
+            unsubscribe = getChat(loggedUser.uid, chatId, setChat)
+        }
+
+        return () => {
+            unsubscribe()
         }
     }, [chatId])
 

@@ -94,7 +94,6 @@ function Store() {
             .catch(err => processSettings("error", err.message))
     }
 
-
     // handle sign up user
     const signUpUserWithEmail = async (user, avatarUrl, callback) => {
         // Destructuring the user
@@ -109,7 +108,17 @@ function Store() {
             const createdUser = auth.createUserWithEmailAndPassword(email, password)
 
             // add to database
-            AddUserToDB(user, await (await createdUser).user.uid, avatarUrl)
+            const { email, username, fullName } = user
+            const userToDB = {
+                email,
+                username,
+                fullName,
+                bio: "",
+                website: "",
+                id: (await createdUser).user.uid,
+                avatar: avatarUrl,
+            }
+            AddUserToDB(userToDB)
 
 
             // add to algolia
@@ -134,20 +143,12 @@ function Store() {
     }
 
     // handle add the user to database
-    const AddUserToDB = (user, id, avatarUrl) => {
-        const { email, username, fullName } = user
-
+    const AddUserToDB = (user) => {
         db
             .collection("members")
-            .doc(id)
+            .doc(user.id)
             .set({
-                email,
-                username,
-                fullName,
-                bio: "",
-                website: "",
-                id,
-                avatar: avatarUrl,
+                ...user
             })
     }
 
@@ -177,10 +178,17 @@ function Store() {
     }
 
     // Update user
-    const updateUser = (userNew) => {
+    const updateUser = async (userNew) => {
         // Check if the user hasn't changed their info to avoid going to the database
-        const isChanged = loggedUser == userNew
-        if (!isChanged) {
+        const isChanged = !(loggedUser == userNew)
+        if (!isChanged) return processSettings("warning", "Change something to submit")
+
+        // update the user if anything has changed but we specially need to check for the username
+        // availability
+        const isUsernameAvailable = Boolean(await isUsernameExisted(userNew.username))
+
+        // If the username is vacant update it
+        if (isUsernameAvailable) {
             db.collection("members")
                 .doc(userNew.id)
                 .update({
@@ -188,8 +196,13 @@ function Store() {
                 })
                 .then(success => processSettings("success", "User updated."))
                 .catch(err => processSettings("error", err.message))
-        } else {
-            processSettings("warning", "Change something to submit")
+
+            // update in algolia
+            // get the objectID from algolia by searching the loggedUser old username
+            // then update it. because algolia needs that objectID attr
+            const userAlgoliaId = (await index.search(loggedUser.username)).hits[0].objectID
+            index.partialUpdateObject({ username: userNew.username, objectID: userAlgoliaId }, { createIfNotExists: true })
+                .catch(error => console.log(error.message))
         }
     }
 
@@ -363,16 +376,11 @@ function Store() {
     // handle fetching a single chat - just for showing chats, not for general use
     // to handle see the last message
     const getChat = (userId, chatId, setChat) => {
-        db.collection("members")
+        const unsubscribe = db.collection("members")
             .doc(userId)
             .collection("chats")
             .doc(chatId)
             .onSnapshot(snapshot => {
-                // Because the listener will keep working, we need to prevent it from updating
-                // therefore I will see the last message without seeing it
-                // I will fix when I learn to stop these listener
-                if (window.location.pathname != `/direct/inbox/t/${chatId}`) return
-
                 setChat(snapshot.exists ? { ...snapshot.data() } : null)
 
                 // handle update the seen status for the logged user
@@ -387,11 +395,19 @@ function Store() {
                         .doc(senToUser.id)
                         .collection("chats")
                         .doc(chatId)
-                        .update({
-                            lastMsgSeen: true,
+                        .get()
+                        .then(chatDoc => {
+                            if (chatDoc.exists) {
+                                console.log("here")
+                                chatDoc.ref.update({
+                                    lastMsgSeen: true,
+                                })
+                            }
                         })
                 }
             })
+
+        return unsubscribe
     }
 
     // handle putting a listener on a user's chat messages
@@ -415,6 +431,8 @@ function Store() {
     const createChatForSenToUser = (userId, chatId, lastMsg) => {
         const chatObj = {
             isMuted: false,
+            seen: false,
+            isTyping: false,
             lastMsg,
             members: [
                 {
@@ -451,7 +469,8 @@ function Store() {
                     username: senToUser.username,
                     avatar: senToUser.avatar
                 }
-            ]
+            ],
+            seen: false
         }
 
         if (chatId == "" || chatId == null) {
@@ -513,23 +532,22 @@ function Store() {
                     // In the function (createChatForSenToUser) the last message was empty
                     // but now it doesn't empty
                     createChatForSenToUser(senToId, chatId, lastMsg)
-
-                    // then add the message
-                    chatDoc
-                        .ref
-                        .collection("messages")
-                        .add(messageObj)
-                } else {
-                    // just send the message cuz the user has the chat
-                    chatDoc
-                        .ref
-                        .collection("messages")
-                        .add(messageObj)
                 }
+
+                // update lastMsgSeen and seen
+                chatDoc
+                    .ref
+                    .update({
+                        lastMsg: { ...lastMsg },
+                        seen: false
+                    })
+
+                // then add the message
+                chatDoc
+                    .ref
+                    .collection("messages")
+                    .add(messageObj)
             })
-
-
-        // handle update the chat's last message and the last message seen
 
         // For the logged user 
         db.collection("members")
@@ -539,16 +557,6 @@ function Store() {
             .update({
                 lastMsg: { ...lastMsg },
                 lastMsgSeen: false
-            })
-
-        // For the senTo user
-        db.collection("members")
-            .doc(senToId)
-            .collection("chats")
-            .doc(chatId)
-            .update({
-                lastMsg: { ...lastMsg },
-                seen: false
             })
     }
 
@@ -598,14 +606,16 @@ function Store() {
             })
     }
 
-    // handle create a new chat when click on message button in the profile or from that dialog if I add it later
+    // handle create a new chat when click on message button in the profile or from
+    //  that dialog if I add it later
     const createChat = (senToUser) => {
         // Check if the logged has a chat with them
         const chatId = db
             .collection("members")
             .doc(loggedUser.uid)
             .collection("chats")
-            .where("members", "array-contains", { id: senToUser.id, username: senToUser.username, avatar: senToUser.avatar })
+            .where("members", "array-contains",
+                { id: senToUser.id, username: senToUser.username, avatar: senToUser.avatar })
             .get()
             .then(async snapshot => {
                 if (snapshot.empty) {
@@ -651,18 +661,18 @@ function Store() {
             .then(snapshot => console.log(snapshot.empty)) */
     }
 
-    // handle see the user's last msg
-    const handleLastMsgSeen = (chatId) => {
-        db.collection("members")
-            .doc(loggedUser.id)
-            .collection("chats")
-            .doc(chatId)
-            .get()
-            .then(snapshot => {
-                const senToUser = snapshot.data().members.find(member => member.id != loggedUser.id)
+    /*     // handle see the user's last msg
+        const handleLastMsgSeen = (chatId) => {
+            db.collection("members")
+                .doc(loggedUser.id)
+                .collection("chats")
+                .doc(chatId)
+                .get()
+                .then(snapshot => {
+                    const senToUser = snapshot.data().members.find(member => member.id != loggedUser.id)
+                })
+        } */
 
-            })
-    }
 
     // handle show (typing...) when the other user is typing
     const handleOtherUserTyping = (chatId, setToUserId, msgText) => {
@@ -671,8 +681,13 @@ function Store() {
             .doc(setToUserId)
             .collection("chats")
             .doc(chatId)
-            .update({
-                isTyping: msgText == "" ? false : true
+            .get()
+            .then(chatDoc => {
+                if (chatDoc.exists) {
+                    chatDoc.ref.update({
+                        isTyping: msgText == "" ? false : true
+                    })
+                }
             })
     }
 
@@ -686,6 +701,17 @@ function Store() {
             .onSnapshot(snapshot => {
                 setChat(snapshot.data())
             })
+    }
+
+    // check if a user is existed in the db or not
+    const isUserExisted = (id) => {
+        const existed = db
+            .collection("members")
+            .doc(id)
+            .get()
+            .then(snapshot => snapshot.exists)
+
+        return existed
     }
 
 
@@ -717,10 +743,13 @@ function Store() {
         createChat,
         deleteChat,
         getPostComments,
-        handleLastMsgSeen,
         handleOtherUserTyping,
         handleGetChat,
         handleSignIn,
+        isUsernameExisted,
+        AddUserToDB,
+        addToAlgolia,
+        isUserExisted,
         loading,
     }
 }
