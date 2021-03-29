@@ -23,7 +23,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
-function GoogleComplete({ authUser, closeDialog }) {
+function CompleteSignIn({ authUser, closeDialog }) {
     const classes = useStyles()
 
     // Router
@@ -89,4 +89,4 @@ function GoogleComplete({ authUser, closeDialog }) {
     )
 }
 
-export default GoogleComplete
+export default CompleteSignIn

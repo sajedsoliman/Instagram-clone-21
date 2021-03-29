@@ -10,6 +10,7 @@ import { AuthedUser } from "../../user-context/AuthedUserContext";
 
 // Algolia
 import algoliasearch from 'algoliasearch'
+import TextField from '@material-ui/core/TextField'
 
 const ALGOLIA_INDEX_NAME = 'members';
 const client = algoliasearch("CR5WXH0CH1", "a1209f3db13e2a909434e3edb487e3b9");
@@ -28,6 +29,25 @@ function Store() {
     // State vars
     const [loading, setLoading] = useState(false)
     const [posts, setPosts] = useState([])
+
+    // send a notification - put it here so I con access it anywhere
+    const handleSendNotification = (userId, text, link, avatar = loggedUser.avatar, variant = "warning") => {
+        const alert = {
+            text,
+            date: firebase.firestore.FieldValue.serverTimestamp(),
+            show: false,
+            seen: false,
+            link,
+            notificationorAvatar: avatar,
+            variant,
+        }
+
+        db
+            .collection("members")
+            .doc(userId)
+            .collection("notifications")
+            .add(alert)
+    }
 
     // get all posts - if there ain't no a logged user
     const getAllPosts = (setPosts) => {
@@ -312,7 +332,12 @@ function Store() {
                     ...authUser
                     // followed info
                 })
-                .then(success => processSettings("success", "Followed"))
+                .then(success => {
+                    processSettings("success", "Followed")
+                    const alertText = `${authUser.fullName} has just followed you`
+                    const alertLink = `/${authUser.username}`
+                    handleSendNotification(followedUser.id, alertText, alertLink, followedUser.avatar)
+                })
                 .catch(err => processSettings("error", err.message))
 
         } else processSettings("warning", "Login to follow others")
@@ -547,6 +572,20 @@ function Store() {
                     .ref
                     .collection("messages")
                     .add(messageObj)
+                    // handle send him a notification
+                    .then(_ => {
+                        // Check if the other user is already inside of the chat or not
+                        // because if they inside the chat, there ain't no need to send them
+                        // a notification
+                        if (!chatDoc.data().seen) {
+                            // If the other user hasn't seen it send them a notification
+                            handleSendNotification(senToId,
+                                `${loggedUser.fullName} has sent you a message`,
+                                `direct/inbox/t/${chatId}`,
+                            )
+
+                        }
+                    })
             })
 
         // For the logged user 
@@ -714,6 +753,69 @@ function Store() {
         return existed
     }
 
+    // handle add a comment
+    const AddComment = (userId, comment, postId, setText, avatar) => {
+        db.collection("posts")
+            .doc(userId)
+            .collection("user_posts")
+            .doc(postId)
+            .collection("post_comments")
+            .add(comment)
+            .then(post => {
+                setText("")
+
+                // Send a notification the post's author
+                // but if the user has commented to themself don't send it
+                if (userId != loggedUser.id) {
+                    const alertText = `${loggedUser.fullName} put a comment for you`
+                    const alertLink = `${userId}/p/${postId}`
+                    handleSendNotification(userId, alertText, alertLink, avatar)
+                }
+            })
+            .catch(err => processSettings("error", err.message))
+    }
+
+    // handle send notification to all friends(followers) when lay out a new post
+    const handleInformFriendsNewPost = (postId) => {
+        db
+            .collection("members")
+            .doc(loggedUser.uid)
+            .collection("followers")
+            .get()
+            .then(followers => {
+                followers.forEach(follower => {
+                    const { id, avatar } = follower.data()
+                    const alertText = `${loggedUser.fullName} put out a new post`
+                    const alertLink = `${loggedUser.id}/p/${postId}`
+                    handleSendNotification(id, alertText, alertLink, avatar)
+                })
+            })
+    }
+
+    // handle get all notifications
+    const getNotifications = (setNotifications) => {
+        db
+            .collection("members")
+            .doc(loggedUser.id)
+            .collection("notifications")
+            .onSnapshot(snapshot => {
+                const notifications = snapshot.docs.map(doc => ({ id: doc.id, body: doc.data() }))
+                setNotifications(notifications)
+            })
+    }
+
+    // handle update seen notification status
+    const handleSeenNotification = (id) => {
+        db
+            .collection("members")
+            .doc(loggedUser.id)
+            .collection("notifications")
+            .doc(id)
+            .update({
+                seen: true
+            })
+    }
+
 
 
     return {
@@ -750,6 +852,11 @@ function Store() {
         AddUserToDB,
         addToAlgolia,
         isUserExisted,
+        handleSendNotification,
+        AddComment,
+        handleInformFriendsNewPost,
+        getNotifications,
+        handleSeenNotification,
         loading,
     }
 }

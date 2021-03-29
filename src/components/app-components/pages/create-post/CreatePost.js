@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useHistory } from 'react-router-dom'
 
 // component imports
 import Controls from '../../../common-components/controls/Controls'
@@ -9,7 +10,6 @@ import { AuthedUser } from '../../../user-context/AuthedUserContext'
 import { useAlert } from '../../../notification-context/NotificationContext'
 import AppPage from '../AppPage'
 
-import { useHistory } from 'react-router'
 
 // Material-UI imports
 import { makeStyles, LinearProgress, Container, Paper, Typography } from '@material-ui/core'
@@ -17,6 +17,7 @@ import { makeStyles, LinearProgress, Container, Paper, Typography } from '@mater
 // firebase database
 import { storage, db, firebase } from '../../../common-components/firebase/database'
 import StepperActions from './StepperActions'
+import Store from '../../../common-components/firebase/Store'
 
 // style
 const useStyles = makeStyles(theme => ({
@@ -56,6 +57,9 @@ function CreatePost() {
     const processSettings = useAlert()
     const user = AuthedUser()
 
+    // Router
+    const history = useHistory()
+
     // State vars
     const [currentStep, setCurrentStep] = useState(0)
     const [progress, setProgress] = useState(0)
@@ -64,29 +68,39 @@ function CreatePost() {
     // import useForm in order to handle inputs
     const { values: postInfo, handleInputsChange } = useForm(initialInfo, false)
 
+    // Import Store component to send notifications to followers when lay out a new post
+    const { handleInformFriendsNewPost } = Store()
+
     // handle upload a post
     useEffect(() => {
         if (mediaUrls.length == postInfo.media.length && currentStep != 0) {
-            db.collection('posts').doc(user.uid).collection("user_posts").add(
-                {
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    media: mediaUrls,
-                    caption: postInfo.caption,
-                    user: {
-                        fullName: user.fullName,
-                        id: user.uid,
-                        username: user.username,
-                        avatar: user.avatar || "",
-                    },
-                    location: postInfo.location ? postInfo.location : "" /* To use an api to spot the location */,
-                    likedBy: []
-                }
-            ).then(_ => {
-                window.location = "/"
-                processSettings("info", "The Post has been created")
-            }).catch(err => {
-                processSettings("error", err.message)
-            })
+            db.
+                collection('posts')
+                .doc(user.uid)
+                .collection("user_posts")
+                .add(
+                    {
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        media: mediaUrls,
+                        caption: postInfo.caption,
+                        user: {
+                            fullName: user.fullName,
+                            id: user.uid,
+                            username: user.username,
+                            avatar: user.avatar || "",
+                        },
+                        location: postInfo.location ? postInfo.location : "" /* To use an api to spot the location */,
+                        likedBy: []
+                    }
+                ).then(post => {
+                    // Send a notification to friends
+                    handleInformFriendsNewPost(post.id)
+
+                    history.replace("/")
+                    processSettings("info", "The Post has been created")
+                }).catch(err => {
+                    processSettings("error", err.message)
+                })
         }
     }, [mediaUrls])
 

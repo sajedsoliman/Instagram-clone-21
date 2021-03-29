@@ -8,7 +8,7 @@ import { Button, makeStyles } from "@material-ui/core"
 import { useForm } from "../../common-components/useForm"
 import UserForm from "../../common-components/user-related/UserForm"
 import Store from "../../common-components/firebase/Store"
-import GoogleComplete from './GoogleComplete'
+import CompleteSignIn from './CompleteSignIn'
 
 // Utilities
 import IF from '../../common-components/utilities/IF'
@@ -88,7 +88,7 @@ function LoginForm({ handleLoginModalClose }) {
 
     // Google last step component
     const googleLastStepRender = (
-        <GoogleComplete authUser={googleAuthUser} closeDialog={handleLoginModalClose} />
+        <CompleteSignIn authUser={googleAuthUser} closeDialog={handleLoginModalClose} />
     )
 
     return (

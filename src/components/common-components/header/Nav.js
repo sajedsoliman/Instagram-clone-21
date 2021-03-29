@@ -1,5 +1,5 @@
 import { Link as RouterLink, useLocation } from 'react-router-dom'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import clsx from "clsx"
 
 // Material-UI imports
@@ -14,7 +14,7 @@ import HomeOutlined from '@material-ui/icons/HomeOutlined';
 import Home from "@material-ui/icons/Home"
 import InboxIcon from '@material-ui/icons/Inbox';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import { PostAdd, Search, Settings, SupervisedUserCircle } from '@material-ui/icons'
+import { Favorite, PostAdd, Search, Settings, SupervisedUserCircle } from '@material-ui/icons'
 
 // component imports / info
 import CustomMenuList from "../CustomMenuList"
@@ -25,6 +25,8 @@ import PopUp from '../PopUp'
 import LoginForm from '../../app-components/forms/LoginForm'
 import RegisterForm from '../../app-components/forms/RegisterForm'
 import Store from '../firebase/Store'
+import Activity from './Activity'
+import IF from '../utilities/IF'
 
 // Hooks
 import useWindowWidth from '../../common-components/hooks/useWindowWidth'
@@ -87,6 +89,9 @@ const useStyles = makeStyles((theme) => ({
 export default function Nav({ navClassName }) {
     const user = AuthedUser()
 
+    // Refs
+    const activityLinkRef = useRef()
+
     // Router
     const location = useLocation()
 
@@ -95,11 +100,17 @@ export default function Nav({ navClassName }) {
     const [loginModal, setLoginModal] = useState({ title: null, isOpen: false })
     const [registerModal, setRegisterModal] = useState({ title: null, isOpen: false })
     const [chats, setChats] = useState([])
+    const [showNotifications, setShowNotifications] = useState(false)
+    const [notifications, setNotifications] = useState([])
 
     // a Listener to listen the user chats' changes
     useEffect(() => {
         if (user != null && user != "no user") {
+            // Get chats
             getUserChats(user.id, setChats)
+
+            // Get notifications
+            getNotifications(setNotifications)
         }
     }, [])
 
@@ -133,6 +144,16 @@ export default function Nav({ navClassName }) {
 
     const handleCloseMenu = () => {
         setAnchorEl(null)
+    }
+
+    // Handle show notification popper
+    const handleShowNotifications = () => {
+        setShowNotifications(true)
+    }
+
+    // handle close notification popper
+    const handleCloseNotifications = () => {
+        setShowNotifications(false)
     }
 
     // Get window width from the hook
@@ -169,12 +190,19 @@ export default function Nav({ navClassName }) {
     }
 
     // Import Store component to get chats
-    const { getUserChats } = Store()
+    const { getUserChats, getNotifications } = Store()
 
     // Check if there any unread messages
     const isThereUnreadMessages = chats.some(chat => {
         return !chat.chat.seen
     })
+
+    // Map through notification
+    const mappedNotifications = notifications.map(alert => {
+        const { id, body } = alert
+        return <Activity key={id} id={id} activity={body} closePopper={handleCloseNotifications} />
+    })
+
 
     return (
         <nav className={clsx(classes.linkNav, navClassName)}>
@@ -201,42 +229,56 @@ export default function Nav({ navClassName }) {
                                 <InboxIcon />
                             </Badge>
                         </Link>
-                        <Link to="/" >
-                            <FavoriteBorderIcon />
+                        {/* Activities */}
+                        <Link ref={activityLinkRef} onClick={handleShowNotifications}>
+                            <IF condition={showNotifications}
+                                elseChildren={<FavoriteBorderIcon />}>
+                                <Favorite />
+                            </IF>
                         </Link>
                         <Link onClick={handleAnchorEl} aria-haspopup="true">
                             <Avatar className={clsx(classes.userAvatar, { "active": anchorEl })} src={user?.avatar} alt="Profile Avatar" />
                         </Link>
 
-                        {Boolean(anchorEl) &&
-                            (<CustomMenuList
-                                popperClassName={classes.menuPopper}
-                                menuClassName={classes.menu}
-                                placement={windowWidth < 600 ? "top-start" : "bottom-end"}
-                                anchorEl={anchorEl}
-                                handleClose={handleCloseMenu}>
-                                {/* Profile */}
-                                <MenuItem
-                                    {...menuProps}
-                                    to={`/${user.username}`}>
-                                    <SupervisedUserCircle /> Profile
+                        <CustomMenuList
+                            popperClassName={classes.menuPopper}
+                            menuClassName={classes.menu}
+                            placement={windowWidth < 600 ? "top-start" : "bottom-end"}
+                            anchorEl={anchorEl}
+                            handleClose={handleCloseMenu}>
+                            {/* Profile */}
+                            <MenuItem
+                                {...menuProps}
+                                to={`/${user.username}`}>
+                                <SupervisedUserCircle /> Profile
                                     </MenuItem>
-                                {/* Settings */}
-                                <MenuItem
-                                    {...menuProps}
-                                    to={`/accounts/edit`}>
-                                    <Settings /> Settings
+                            {/* Settings */}
+                            <MenuItem
+                                {...menuProps}
+                                to={`/accounts/edit`}>
+                                <Settings /> Settings
                                     </MenuItem>
-                                <Divider />
-                                {/* Logout Functionality */}
-                                <MenuItem dense onClick={handleLogout}>Logout</MenuItem>
-                            </CustomMenuList>)}
+                            <Divider />
+                            {/* Logout Functionality */}
+                            <MenuItem dense onClick={handleLogout}>Logout</MenuItem>
+                        </CustomMenuList>
                     </div>
                     : (
                         <LoggedUserAction handleLoginModalOpen={handleLoginModalOpen}
                             handleRegisterModalOpen={handleRegisterModalOpen} />
                     )
             }
+
+            {/* Activities popper */}
+            <CustomMenuList
+                popperClassName={classes.menuPopper}
+                menuClassName={classes.menu}
+                placement={windowWidth < 600 ? "top-start" : "bottom-end"}
+                anchorEl={activityLinkRef.current}
+                open={showNotifications}
+                handleClose={handleCloseNotifications}>
+                {mappedNotifications}
+            </CustomMenuList>
 
             {/* Login Modal */}
             <PopUp infoFunc={loginModal} closeHandle={handleLoginModalClose}>

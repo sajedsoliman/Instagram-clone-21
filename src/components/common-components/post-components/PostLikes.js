@@ -8,6 +8,7 @@ import clsx from "clsx"
 import { AuthedUser } from '../../user-context/AuthedUserContext'
 import { useAlert } from '../../notification-context/NotificationContext'
 import { db, firebase } from '../../common-components/firebase/database'
+import Store from '../firebase/Store'
 
 const useStyles = makeStyles(theme => ({
     postActionContainer: {
@@ -65,8 +66,18 @@ function PostLikes(props) {
     const likerObj = likers.find(liker => liker.id == loggedUser.uid)
     const isLiked = Boolean(likerObj)
 
+    // Import Store component to send a notification
+    const { handleSendNotification } = Store()
+
     // handling like ability
     const handleToggleLike = () => {
+        // Handle send a notification
+        if (isLiked == false && (loggedUser.uid != user.id)) {
+            const alertText = `${loggedUser.fullName} has liked your post`
+            const postLink = `${user.id}/p/${docId}`
+            handleSendNotification(user.id, alertText, postLink, loggedUser.avatar)
+        }
+
         if (loggedUser != "no user") {
             const newLiker = { liker: loggedUser.fullName, id: loggedUser.uid }
             db.collection("posts")

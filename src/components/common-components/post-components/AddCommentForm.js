@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Button, InputBase, makeStyles } from "@material-ui/core"
 
 // component imports
+import Store from "../firebase/Store"
 import { AuthedUser } from "../../user-context/AuthedUserContext"
 import { db } from "../firebase/database"
 
@@ -39,6 +40,9 @@ function AddCommentForm(props) {
         setText(e.target.value)
     }
 
+    // Import Store component to add a comment
+    const { AddComment } = Store()
+
     // handle add comment submission
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -48,16 +52,8 @@ function AddCommentForm(props) {
             commenter: loggedUser.fullName || "Guest"
         }
 
-        db.collection("posts")
-            .doc(user.id)
-            .collection("user_posts")
-            .doc(docId)
-            .collection("post_comments")
-            .add(comment)
-            .then(post => {
-                setText("")
-            })
-            .catch(err => alert(err.message))
+        // handle add the comment
+        AddComment(user.id, comment, docId, setText, user.avatar)
     }
 
     return (
