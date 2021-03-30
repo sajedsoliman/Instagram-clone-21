@@ -36,13 +36,15 @@ import Inbox from './app-components/pages/inbox/Inbox'
 import ActiveChat from './app-components/pages/inbox/single-chat/ActiveChat'
 import MobileBottomBar from './app-components/header/MobileBottomBar'
 import SearchUser from './app-components/pages/search-user/SearchUser'
+import Store from './common-components/firebase/Store';
+import Activities from './app-components/pages/user-activity/Activities';
 
 
 // style stuff
 import "normalize.css"
 import "../styles/dist/main.min.css"
 import commonTheme from "./commonTheme"
-import { db } from './common-components/firebase/database'
+import { db, batch } from './common-components/firebase/database'
 
 const useStyles = makeStyles(theme => ({
     addPostBtn: {
@@ -73,43 +75,50 @@ export default function App() {
     // Import notiStack snackBars
     const { enqueueSnackbar } = useSnackbar()
 
+    // Import Store component to handle seen when click go on alerts
+    const { handleSeenNotification } = Store()
+
     // State vars
 
     // set a listener for notifications
     useEffect(() => {
-        // add the listener
-        db.collection("members")
-            .doc(loggedUser.uid)
-            .collection("notifications")
-            .onSnapshot(snapshot => {
-                /* const unSeenNotifications =  */
-                snapshot.docs
-                    .map(doc => ({ id: doc.id, body: doc.data() }))
-                    .forEach(alert => {
-                        if (!(alert.body.show)) {
-                            const { text, link, variant } = alert.body
-                            enqueueSnackbar(text, {
-                                anchorOrigin: {
-                                    horizontal: "right",
-                                    vertical: "bottom"
-                                },
-                                action: (
-                                    <Button to={link} component={RouterLink}>Go</Button>
-                                ),
-                                variant,
-                                resumeHideDuration: 1000,
-                                autoHideDuration: 2500
-                            })
-                        }
-                    })
+        // add the listener if there is a user
+        if (loggedUser != "no user" && window.innerWidth > 700) {
+            db.collection("members")
+                .doc(loggedUser.uid)
+                .collection("notifications")
+                .onSnapshot(snapshot => {
+                    // Just get the documents that have been changed
+                    snapshot.docChanges()
+                        .forEach(change => {
+                            // if the change type is that a document has been added
+                            // show the alert and change its show to true
+                            if (change.type == "added") {
+                                const docData = change.doc.data()
+                                if (!docData.show) {
+                                    const { text, link, variant } = docData
+                                    enqueueSnackbar(text, {
+                                        anchorOrigin: {
+                                            horizontal: "right",
+                                            vertical: "bottom"
+                                        },
+                                        action: (
+                                            // click on go button will set the seen state to true
+                                            <Button to={link}
+                                                onClick={() => handleSeenNotification(change.doc.id)} component={RouterLink}>Go</Button>
+                                        ),
+                                        variant,
+                                        resumeHideDuration: 1000,
+                                        autoHideDuration: 2500
+                                    })
 
-                // handle show notifications
-                snapshot.docs.forEach(doc => {
-                    doc.ref.update({
-                        show: true
-                    })
+                                    // Update it
+                                    change.doc.ref.update({ show: true })
+                                }
+                            }
+                        })
                 })
-            })
+        }
     }, [])
 
 
@@ -165,6 +174,11 @@ export default function App() {
                                 {/* User inbox page - authed */}
                                 <AuthRoute path="/direct/inbox">
                                     <Inbox />
+                                </AuthRoute>
+
+                                {/* User activities - authed */}
+                                <AuthRoute path="/accounts/activity">
+                                    <Activities />
                                 </AuthRoute>
 
                                 {/* Single post page */}

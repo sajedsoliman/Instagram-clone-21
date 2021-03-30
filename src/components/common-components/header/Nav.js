@@ -1,4 +1,4 @@
-import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 import clsx from "clsx"
 
@@ -82,7 +82,10 @@ const useStyles = makeStyles((theme) => ({
         }
     },
     menu: {
-        minWidth: 200
+        minWidth: 200,
+        // max height to limit noti menu height and make it scroll 
+        maxHeight: 400,
+        overflowY: "auto"
     },
 }))
 
@@ -94,6 +97,7 @@ export default function Nav({ navClassName }) {
 
     // Router
     const location = useLocation()
+    const history = useHistory()
 
     // State vars
     const [anchorEl, setAnchorEl] = useState(null)
@@ -102,6 +106,10 @@ export default function Nav({ navClassName }) {
     const [chats, setChats] = useState([])
     const [showNotifications, setShowNotifications] = useState(false)
     const [notifications, setNotifications] = useState([])
+
+    // Get window width from the hook
+    const { windowWidth } = useWindowWidth()
+
 
     // a Listener to listen the user chats' changes
     useEffect(() => {
@@ -146,18 +154,10 @@ export default function Nav({ navClassName }) {
         setAnchorEl(null)
     }
 
-    // Handle show notification popper
-    const handleShowNotifications = () => {
-        setShowNotifications(true)
-    }
-
     // handle close notification popper
     const handleCloseNotifications = () => {
         setShowNotifications(false)
     }
-
-    // Get window width from the hook
-    const { windowWidth } = useWindowWidth()
 
     // handle logout
     const handleLogout = () => {
@@ -192,16 +192,29 @@ export default function Nav({ navClassName }) {
     // Import Store component to get chats
     const { getUserChats, getNotifications } = Store()
 
-    // Check if there any unread messages
+    // Check if there any are unread messages
     const isThereUnreadMessages = chats.some(chat => {
         return !chat.chat.seen
     })
+
+    // Check if there are unseen notifications
+    const isThereUnseenNoti = notifications.some(noti => !noti.body.seen)
 
     // Map through notification
     const mappedNotifications = notifications.map(alert => {
         const { id, body } = alert
         return <Activity key={id} id={id} activity={body} closePopper={handleCloseNotifications} />
     })
+
+    // Handle show notification popper
+    const handleToggleNotifications = () => {
+        // Check if the window screen is less that 600 then go the full activities page
+        if (windowWidth < 600)
+            history.replace("/accounts/activity", { notifications })
+        else setShowNotifications(prev => {
+            return !prev
+        })
+    }
 
 
     return (
@@ -224,17 +237,23 @@ export default function Nav({ navClassName }) {
                             </>
                         )}
                         <Link to="/direct/inbox" component={RouterLink}>
-                            <Badge variant="dot" overlap="circle" color="secondary"
+                            <Badge variant="dot"
+                                overlap="circle" color="secondary"
                                 invisible={!isThereUnreadMessages}>
                                 <InboxIcon />
                             </Badge>
                         </Link>
                         {/* Activities */}
-                        <Link ref={activityLinkRef} onClick={handleShowNotifications}>
-                            <IF condition={showNotifications}
-                                elseChildren={<FavoriteBorderIcon />}>
-                                <Favorite />
-                            </IF>
+                        <Link ref={activityLinkRef} onClick={handleToggleNotifications}>
+                            <Badge
+                                variant="dot" color="secondary"
+                                invisible={!isThereUnseenNoti} overlap="circle">
+                                <IF condition={showNotifications}
+                                    elseChildren={<FavoriteBorderIcon />}>
+                                    <Favorite />
+                                </IF>
+                            </Badge>
+
                         </Link>
                         <Link onClick={handleAnchorEl} aria-haspopup="true">
                             <Avatar className={clsx(classes.userAvatar, { "active": anchorEl })} src={user?.avatar} alt="Profile Avatar" />

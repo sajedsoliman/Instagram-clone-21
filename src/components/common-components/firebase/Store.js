@@ -423,7 +423,6 @@ function Store() {
                         .get()
                         .then(chatDoc => {
                             if (chatDoc.exists) {
-                                console.log("here")
                                 chatDoc.ref.update({
                                     lastMsgSeen: true,
                                 })
@@ -798,6 +797,7 @@ function Store() {
             .collection("members")
             .doc(loggedUser.id)
             .collection("notifications")
+            .orderBy("date", "desc")
             .onSnapshot(snapshot => {
                 const notifications = snapshot.docs.map(doc => ({ id: doc.id, body: doc.data() }))
                 setNotifications(notifications)

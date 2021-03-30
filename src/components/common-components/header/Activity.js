@@ -7,43 +7,58 @@ import clsx from 'clsx'
 // component
 import Store from '../firebase/Store'
 
+// Functions
+import { presenceDate } from '../../app-components/utilities/functions'
+
+
 // Styles
 const useStyles = makeStyles(theme => ({
     item: {
-        color: "black"
+        color: "black",
+    },
+    title: {
+
+        "&.not-seen": {
+            fontWeight: "bold"
+        }
     }
 }))
 
 
-function Activity({ activity, closePopper, id }) {
+function Activity({ activity, closePopper, id, isButton = false, itemStyles }) {
     const classes = useStyles()
 
     // Destructuring through the activity
-    const { text, link, seen, notificationorAvatar } = activity
+    const { text, link, seen, notificationorAvatar, date } = activity
 
     // Import Store to handle seen status
     const { handleSeenNotification } = Store()
 
     // handle Click notification
     const handleCLick = () => {
-        // close the poper
-        closePopper()
+        // close the popper if the user is not inside of the noti route
+        if (closePopper != undefined) {
+            closePopper()
+        }
 
         // update seen true
         handleSeenNotification(id)
     }
 
     return (
-        <ListItem className={classes.item}
+        <ListItem className={clsx(itemStyles, classes.item)}
             to={`/${link}`}
+            button={isButton}
             component={RouterLink}
             onClick={handleCLick}>
             <ListItemAvatar>
                 <Avatar src={notificationorAvatar} />
             </ListItemAvatar>
-            <ListItemText primary={text}
+            <ListItemText
+                secondary={presenceDate(date)}
+                primary={text}
                 primaryTypographyProps={{
-                    style: { fontWeight: !seen && "bold" },
+                    className: clsx(classes.title, { "not-seen": !seen }),
                     variant: "body2"
                 }} />
         </ListItem>
