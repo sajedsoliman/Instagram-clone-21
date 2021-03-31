@@ -224,11 +224,13 @@ export default function App() {
                                 } />
                             )
                         }
+
                         {/* Show the whole active chat if the window width < 960px */}
                         {
                             mobile && (
-                                <Route path="/direct/inbox/t/:chatId" render={(props) => <ActiveChat />
-                                } />
+                                <Route path={`/direct/inbox/t/:chatId`} render={({ location }) => {
+                                    return <ActiveChat />
+                                }} />
                             )
                         }
 

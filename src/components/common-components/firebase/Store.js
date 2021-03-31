@@ -116,6 +116,9 @@ function Store() {
 
     // handle sign up user
     const signUpUserWithEmail = async (user, avatarUrl, callback) => {
+        // Start loading
+        setLoading(true)
+
         // Destructuring the user
         const { email, username, password, fullName } = user
 
@@ -128,7 +131,6 @@ function Store() {
             const createdUser = auth.createUserWithEmailAndPassword(email, password)
 
             // add to database
-            const { email, username, fullName } = user
             const userToDB = {
                 email,
                 username,
@@ -335,7 +337,7 @@ function Store() {
                 .then(success => {
                     processSettings("success", "Followed")
                     const alertText = `${authUser.fullName} has just followed you`
-                    const alertLink = `/${authUser.username}`
+                    const alertLink = `${authUser.username}`
                     handleSendNotification(followedUser.id, alertText, alertLink, followedUser.avatar)
                 })
                 .catch(err => processSettings("error", err.message))
@@ -558,6 +560,7 @@ function Store() {
                     createChatForSenToUser(senToId, chatId, lastMsg)
                 }
 
+
                 // update lastMsgSeen and seen
                 chatDoc
                     .ref
@@ -576,13 +579,15 @@ function Store() {
                         // Check if the other user is already inside of the chat or not
                         // because if they inside the chat, there ain't no need to send them
                         // a notification
-                        if (!chatDoc.data().seen) {
+                        // Check if the last unseen message was before enough to send them 
+                        // another noti
+                        // Check if the message and the new message has a gap in time >= 600 seconds(10 mins)
+                        const isThereEnoughGap = ((new Date().getTime() / 1000) - (chatDoc.data().lastMsg.sendDate.seconds)) >= 120
+                        if (chatDoc.exists && !chatDoc.data().seen && isThereEnoughGap) {
                             // If the other user hasn't seen it send them a notification
                             handleSendNotification(senToId,
                                 `${loggedUser.fullName} has sent you a message`,
-                                `direct/inbox/t/${chatId}`,
-                            )
-
+                                `direct/inbox/t/${chatId}`)
                         }
                     })
             })

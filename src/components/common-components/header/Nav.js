@@ -1,32 +1,31 @@
-import { Link as RouterLink, useHistory, useLocation } from 'react-router-dom'
+import { Link as RouterLink, useHistory } from 'react-router-dom'
 import { useEffect, useRef, useState } from 'react'
 import clsx from "clsx"
 
 // Material-UI imports
-import { Badge, Divider } from '@material-ui/core'
+import { Badge } from '@material-ui/core'
 import makeStyles from "@material-ui/core/styles/makeStyles"
 import Link from "@material-ui/core/Link"
 import Avatar from "@material-ui/core/Avatar"
-import MenuItem from "@material-ui/core/MenuItem"
 
 // icons
 import HomeOutlined from '@material-ui/icons/HomeOutlined';
 import Home from "@material-ui/icons/Home"
 import InboxIcon from '@material-ui/icons/Inbox';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-import { Favorite, PostAdd, Search, Settings, SupervisedUserCircle } from '@material-ui/icons'
+import { Favorite, PostAdd, Search } from '@material-ui/icons'
 
 // component imports / info
 import CustomMenuList from "../CustomMenuList"
-import { auth, db } from "../firebase/database"
 import { AuthedUser } from '../../user-context/AuthedUserContext'
 import LoggedUserAction from '../../app-components/header/LoggedUserAction'
 import PopUp from '../PopUp'
 import LoginForm from '../../app-components/forms/LoginForm'
 import RegisterForm from '../../app-components/forms/RegisterForm'
 import Store from '../firebase/Store'
-import Activity from './Activity'
 import IF from '../utilities/IF'
+import UserProfileMenu from '../../app-components/header/UserProfileMenu'
+import ActivityList from '../user-related/ActivityList'
 
 // Hooks
 import useWindowWidth from '../../common-components/hooks/useWindowWidth'
@@ -70,33 +69,21 @@ const useStyles = makeStyles((theme) => ({
             boxShadow: "0 0 0 2px white, 0 0 0 3.3px #000"
         }
     },
-    item: {
-        marginRight: "0 !important",
-        "& svg": {
-            marginRight: 15
-        }
-    },
     menuPopper: {
         [theme.breakpoints.down("xs")]: {
             top: "-12px !important",
         }
     },
-    menu: {
-        minWidth: 200,
-        // max height to limit noti menu height and make it scroll 
-        maxHeight: 400,
-        overflowY: "auto"
-    },
 }))
 
 export default function Nav({ navClassName }) {
+    const classes = useStyles()
     const user = AuthedUser()
 
     // Refs
     const activityLinkRef = useRef()
 
     // Router
-    const location = useLocation()
     const history = useHistory()
 
     // State vars
@@ -110,6 +97,9 @@ export default function Nav({ navClassName }) {
     // Get window width from the hook
     const { windowWidth } = useWindowWidth()
 
+    // Import Store component to get chats
+    const { getUserChats, getNotifications } = Store()
+
 
     // a Listener to listen the user chats' changes
     useEffect(() => {
@@ -117,10 +107,10 @@ export default function Nav({ navClassName }) {
             // Get chats
             getUserChats(user.id, setChats)
 
-            // Get notifications
+            // Set a listener on noti
             getNotifications(setNotifications)
         }
-    }, [])
+    }, [user])
 
     const handleLoginModalOpen = () => {
         setLoginModal(prev => ({
@@ -159,39 +149,6 @@ export default function Nav({ navClassName }) {
         setShowNotifications(false)
     }
 
-    // handle logout
-    const handleLogout = () => {
-        auth.signOut()
-
-        // close the menu when logout
-        handleCloseMenu()
-
-        // empty the location state
-        if (location.state && location.state.user) {
-            location.state.user = false
-        }
-
-        // update user's active state to false
-        db.collection("members")
-            .doc(user.uid)
-            .update({
-                active: false
-            })
-    }
-
-    const classes = useStyles()
-
-    // menu link common props
-    const menuProps = {
-        className: classes.item,
-        dense: true,
-        component: RouterLink,
-        onClick: handleCloseMenu
-    }
-
-    // Import Store component to get chats
-    const { getUserChats, getNotifications } = Store()
-
     // Check if there any are unread messages
     const isThereUnreadMessages = chats.some(chat => {
         return !chat.chat.seen
@@ -199,12 +156,6 @@ export default function Nav({ navClassName }) {
 
     // Check if there are unseen notifications
     const isThereUnseenNoti = notifications.some(noti => !noti.body.seen)
-
-    // Map through notification
-    const mappedNotifications = notifications.map(alert => {
-        const { id, body } = alert
-        return <Activity key={id} id={id} activity={body} closePopper={handleCloseNotifications} />
-    })
 
     // Handle show notification popper
     const handleToggleNotifications = () => {
@@ -261,25 +212,10 @@ export default function Nav({ navClassName }) {
 
                         <CustomMenuList
                             popperClassName={classes.menuPopper}
-                            menuClassName={classes.menu}
                             placement={windowWidth < 600 ? "top-start" : "bottom-end"}
                             anchorEl={anchorEl}
                             handleClose={handleCloseMenu}>
-                            {/* Profile */}
-                            <MenuItem
-                                {...menuProps}
-                                to={`/${user.username}`}>
-                                <SupervisedUserCircle /> Profile
-                                    </MenuItem>
-                            {/* Settings */}
-                            <MenuItem
-                                {...menuProps}
-                                to={`/accounts/edit`}>
-                                <Settings /> Settings
-                                    </MenuItem>
-                            <Divider />
-                            {/* Logout Functionality */}
-                            <MenuItem dense onClick={handleLogout}>Logout</MenuItem>
+                            <UserProfileMenu handleCloseMenu={handleCloseMenu} />
                         </CustomMenuList>
                     </div>
                     : (
@@ -291,12 +227,12 @@ export default function Nav({ navClassName }) {
             {/* Activities popper */}
             <CustomMenuList
                 popperClassName={classes.menuPopper}
-                menuClassName={classes.menu}
                 placement={windowWidth < 600 ? "top-start" : "bottom-end"}
                 anchorEl={activityLinkRef.current}
                 open={showNotifications}
                 handleClose={handleCloseNotifications}>
-                {mappedNotifications}
+                <ActivityList handleCloseNotifications={handleCloseNotifications}
+                    notification={notifications} />
             </CustomMenuList>
 
             {/* Login Modal */}

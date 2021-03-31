@@ -18,13 +18,14 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-function PostCardHeader({ creatorInfo, location, handleOpenModal }) {
+function PostCardHeader({ creatorInfo, location, handleOpenModal, closeProfileOverview, showProfileOverview }) {
     const classes = useStyles()
     const { avatar, fullName, username } = creatorInfo
 
     // card header props
     const headerProps = {
-        avatar: <Avatar alt={fullName} src={avatar}>{fullName[0]}</Avatar>,
+        avatar: <Avatar onMouseOver={showProfileOverview}
+            alt={fullName} src={avatar}>{fullName[0]}</Avatar>,
         title: <RouterLink className={classes.profileLink} to={`/${username}`}>{fullName}</RouterLink>,
         classes: {
             title: classes.headerTitle
@@ -39,7 +40,7 @@ function PostCardHeader({ creatorInfo, location, handleOpenModal }) {
     }
 
     return (
-        <CardHeader  {...headerProps} />
+        <CardHeader {...headerProps} />
     )
 }
 

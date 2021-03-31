@@ -25,6 +25,9 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
+// isButton => if the menu item has the button attr or not (default => not)
+// item styles => to add custom style on items if need
+// closePopper => to close the popper if users in desktop
 function Activity({ activity, closePopper, id, isButton = false, itemStyles }) {
     const classes = useStyles()
 

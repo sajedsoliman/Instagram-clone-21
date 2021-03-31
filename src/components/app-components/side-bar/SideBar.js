@@ -1,5 +1,6 @@
 // Material-Ui imports
-import { makeStyles, Typography } from '@material-ui/core'
+import { Button, makeStyles, Typography } from '@material-ui/core'
+import { useRef, useState } from 'react'
 
 // Component imports
 import UserInfo from './UserInfo'
@@ -22,6 +23,7 @@ const useStyles = makeStyles(theme => ({
 
 function SideBar() {
     const classes = useStyles()
+
 
     return (
         <div className={classes.sidebar}>

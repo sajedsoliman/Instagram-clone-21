@@ -1,18 +1,16 @@
-import { useEffect, useRef } from "react"
-import { MenuList, makeStyles, Popper, ClickAwayListener, Paper, Grow } from '@material-ui/core'
+import { makeStyles, Popper, Paper, Grow } from '@material-ui/core'
 import clsx from "clsx"
 
 // styles
 const useStyles = makeStyles((theme) => ({
     popper: {
-        top: "19px !important"
     },
 }))
 
 
 export default function MenuListCom(props) {
     // destructuring props
-    const { anchorEl, handleClose, open, placement = "top-end", popperClassName, children } = props
+    const { anchorEl, open, placement = "top-end", popperClassName, children, portal } = props
     const classes = useStyles()
 
     const popperProps = {
@@ -24,7 +22,7 @@ export default function MenuListCom(props) {
     }
 
     return (
-        <Popper {...popperProps}>
+        <Popper {...popperProps} disablePortal={!portal}>
             <Grow in={open || Boolean(anchorEl)}>
                 <Paper elevation={3}>
                     {children}

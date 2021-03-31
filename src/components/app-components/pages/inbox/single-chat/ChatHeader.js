@@ -28,7 +28,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-function ChatHeader({ member, toggleDetails, detailsOpen }) {
+function ChatHeader({ member, toggleDetailsHandler, detailsOpen }) {
     const classes = useStyles()
 
     // Destructuring the member
@@ -49,9 +49,10 @@ function ChatHeader({ member, toggleDetails, detailsOpen }) {
         variant: "h6"
     }
 
+
     // Chat action
     const chatAction = (
-        <IconButton onClick={toggleDetails} color="inherit">
+        <IconButton onClick={() => toggleDetailsHandler()} color="inherit">
             {detailsOpen ? <Info /> : <InfoOutlined />}
         </IconButton>
     )

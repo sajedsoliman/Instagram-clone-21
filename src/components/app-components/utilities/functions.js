@@ -16,9 +16,9 @@ function presenceDate(timestamp) {
         { label: 'sec', seconds: 1 }
     ];
 
-    let timeInSeconds = Math.round(((new Date().getTime() / 1000) - timestamp?.seconds))
-    const interval = intervals.find(i => i.seconds < timeInSeconds);
-    const count = Math.floor(timeInSeconds / interval?.seconds);
+    let timeInSeconds = Math.ceil(((new Date().getTime() / 1000) - timestamp?.seconds))
+    const interval = intervals.find(i => i.seconds <= timeInSeconds);
+    const count = Math.floor(timeInSeconds / interval.seconds);
 
     // setCreatedTime(`${count} ${interval.label}${count !== 1 ? 's' : ''} ago`)
     return `${count} ${interval.label}${count > 1 ? "s" : ""} ago`;

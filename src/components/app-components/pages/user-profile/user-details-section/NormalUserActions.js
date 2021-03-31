@@ -30,7 +30,7 @@ function NormalUserActions({ user }) {
     // imports Store functions
     const { getUserFollowers, handleFollow } = Store()
 
-    // fetch/import logged user follower
+    // fetch/import logged user followers
     useEffect(() => {
         getUserFollowers(id, setFollowers)
     }, [])

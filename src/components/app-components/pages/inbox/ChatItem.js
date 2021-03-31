@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
 // Router
-import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 
 // UI imports
-import { Avatar, Badge, ListItem, ListItemAvatar, ListItemText, makeStyles, Typography } from '@material-ui/core'
+import { Avatar, Badge, ListItem, ListItemAvatar, ListItemText, makeStyles } from '@material-ui/core'
 
 // Icons
 import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
@@ -12,7 +12,6 @@ import FiberManualRecord from '@material-ui/icons/FiberManualRecord';
 // Component imports
 import clsx from 'clsx'
 import Store from '../../../common-components/firebase/Store'
-import { db } from '../../../common-components/firebase/database';
 
 // style staff
 const useStyles = makeStyles(theme => ({
@@ -44,7 +43,9 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 
-function ChatItem({ chat, authUserId, chatDocId, handleCLoseDetails }) {
+
+// toggleDetailsHandler => to pass it to active chat when render it alone (in mobiles)
+function ChatItem({ chat, authUserId, chatDocId, handleCloseDetails }) {
     const classes = useStyles()
 
     // destructuring the chat
@@ -98,11 +99,11 @@ function ChatItem({ chat, authUserId, chatDocId, handleCLoseDetails }) {
     return (
         <ListItem
             // Close details up when click on item
-            onClick={() => handleCLoseDetails()}
+            onClick={() => handleCloseDetails()}
             button to={{
                 pathname: `/direct/inbox/t/${chatDocId}`, ...(window.innerWidth < 960 ? {
                     state: {
-                        mobile: true
+                        mobile: true,
                     }
                 } : {}),
             }} component={RouterLink}>

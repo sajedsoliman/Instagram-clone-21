@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 // Router
-import { useLocation, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 
 // UI imports
 import { Grid, makeStyles } from '@material-ui/core'
@@ -15,7 +15,7 @@ import ChatHeader from './ChatHeader'
 import ChatMessages from './ChatMessages'
 import ChatDetails from './ChatDetails'
 
-function ActiveChat({ details, toggleDetailsHandler }) {
+function ActiveChat() {
     const layout = Layout()
 
     // Styles
@@ -35,6 +35,9 @@ function ActiveChat({ details, toggleDetailsHandler }) {
     const classes = useStyles()
 
     // State vars
+    // Put details here so I can toggle details on mobile (because react router requires to put the active chat mobile router in app component)
+    // so we can't toggle details on mobile
+    const [details, setDetails] = useState(false)
     const [chat, setChat] = useState(null)
 
     // Router
@@ -56,16 +59,20 @@ function ActiveChat({ details, toggleDetailsHandler }) {
         }
     }, [chatId])
 
+    // handel toggle chat details
+    const toggleDetailsHandler = () => {
+        setDetails(!details)
+    }
+
     if (chat == null) return null
 
     // Get some info
     const senToMember = chat.members.find(member => member.id != loggedUser.uid)
 
-
     // Chat header props
     const headerProps = {
         detailsOpen: details,
-        toggleDetails: toggleDetailsHandler,
+        toggleDetailsHandler,
         member: senToMember,
     }
 
