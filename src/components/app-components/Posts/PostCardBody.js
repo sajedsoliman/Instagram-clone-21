@@ -61,7 +61,8 @@ function PostCardBody(props) {
             <PostLikes likedBy={likedBy} user={user} docId={docId} />
 
             {/* Post Content */}
-            <PostCaption username={user.username} caption={caption} />
+            <PostCaption
+                user={user} username={user.username} caption={caption} />
 
             {/* show all comments toggler */}
             {commentsCount == 0 ?

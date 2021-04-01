@@ -60,6 +60,22 @@ function Store() {
             })
     }
 
+    // handle update user posts details when it gets changed
+    const updateUserPosts = (userId, newValues) => {
+        db
+            .collection("posts")
+            .doc(userId)
+            .collection("user_posts")
+            .get()
+            .then(snapshot => {
+                snapshot.docs.forEach(doc => {
+                    doc.ref.update({
+                        ...newValues
+                    })
+                })
+            })
+    }
+
     // get followed users posts- if there is a logged user
     const getFollowedPosts = (loggedUserId, setPosts) => {
         setLoading(true)
@@ -207,16 +223,33 @@ function Store() {
 
         // update the user if anything has changed but we specially need to check for the username
         // availability
-        const isUsernameAvailable = Boolean(await isUsernameExisted(userNew.username))
+        // Check if the username has changed or not
+        let isUsernameAvailable
+        if (loggedUser.username != userNew.username) {
+            isUsernameAvailable = Boolean(await isUsernameExisted(userNew.username))
+        }
 
-        // If the username is vacant update it
-        if (isUsernameAvailable) {
+        // If the username is vacant update it or if it didn't change
+        if ((loggedUser.username == userNew.username) || isUsernameAvailable) {
+            // update all user posts with new info
+            // Check if either username or fullName has changed
+            if (userNew.username !== loggedUser.username || userNew.fullName !== loggedUser.fullName) {
+                // Update them
+                const newUserPostValue = {
+                    "user.fullName": userNew.fullName,
+                    "user.username": userNew.username
+                }
+                updateUserPosts(loggedUser.id, newUserPostValue)
+            }
+
             db.collection("members")
                 .doc(userNew.id)
                 .update({
                     ...userNew
                 })
-                .then(success => processSettings("success", "User updated."))
+                .then(success => {
+                    processSettings("success", "User updated.")
+                })
                 .catch(err => processSettings("error", err.message))
 
             // update in algolia
@@ -542,8 +575,27 @@ function Store() {
             .doc(loggedUserId)
             .collection("chats")
             .doc(chatId)
-            .collection("messages")
-            .add(messageObj)
+            .get()
+            .then(chatDoc => {
+                // Check if the other user is already inside of the chat or not
+                // because if they inside the chat, there ain't no need to send them
+                // a notification
+                // Check if the last unseen message was before enough to send them 
+                // another noti
+                // Check if the message and the new message has a gap in time >= 600 seconds(10 mins)
+                const isThereEnoughGap = ((new Date().getTime() / 1000) - (chatDoc.data().lastMsg.sendDate.seconds)) >= 60
+                if (chatDoc.exists && !chatDoc.data().lastMsgSeen && isThereEnoughGap) {
+                    // If the other user hasn't seen it send them a notification
+                    handleSendNotification(senToId,
+                        `${loggedUser.fullName} has sent you a message`,
+                        `direct/inbox/t/${chatId}`)
+                }
+                chatDoc
+                    .ref
+                    .collection("messages")
+                    .add(messageObj)
+            })
+
 
         // handle add the message to SenTo chat
         db.collection("members")
@@ -576,19 +628,7 @@ function Store() {
                     .add(messageObj)
                     // handle send him a notification
                     .then(_ => {
-                        // Check if the other user is already inside of the chat or not
-                        // because if they inside the chat, there ain't no need to send them
-                        // a notification
-                        // Check if the last unseen message was before enough to send them 
-                        // another noti
-                        // Check if the message and the new message has a gap in time >= 600 seconds(10 mins)
-                        const isThereEnoughGap = ((new Date().getTime() / 1000) - (chatDoc.data().lastMsg.sendDate.seconds)) >= 120
-                        if (chatDoc.exists && !chatDoc.data().seen && isThereEnoughGap) {
-                            // If the other user hasn't seen it send them a notification
-                            handleSendNotification(senToId,
-                                `${loggedUser.fullName} has sent you a message`,
-                                `direct/inbox/t/${chatId}`)
-                        }
+
                     })
             })
 
@@ -821,6 +861,22 @@ function Store() {
             })
     }
 
+    // handle get latest user's 3 posts
+    const getLatestUserPosts = (userId, postsCount, setLatestPosts) => {
+        setLoading(true)
+        db
+            .collection("posts")
+            .doc(userId)
+            .collection("user_posts")
+            .orderBy("timestamp", "desc")
+            .limit(postsCount)
+            .get()
+            .then(posts => {
+                setLatestPosts(posts.docs.map(doc => ({ id: doc.id, post: doc.data() })))
+                setLoading(false)
+            })
+    }
+
 
 
     return {
@@ -862,6 +918,8 @@ function Store() {
         handleInformFriendsNewPost,
         getNotifications,
         handleSeenNotification,
+        getLatestUserPosts,
+        updateUserPosts,
         loading,
     }
 }

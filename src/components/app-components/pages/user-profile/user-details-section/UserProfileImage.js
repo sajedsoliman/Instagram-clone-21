@@ -6,6 +6,9 @@ import { Avatar, List, ListItem, ListItemText, makeStyles, CircularProgress } fr
 // component imports
 import PopUp from '../../../../common-components/PopUp'
 import Controls from '../../../../common-components/controls/Controls'
+import Store from '../../../../common-components/firebase/Store'
+
+// Server
 import { db, storage } from '../../../../common-components/firebase/database'
 
 // contexts
@@ -73,6 +76,9 @@ function UserProfileImage(props) {
         avatarInputRef.current.browse()
     }
 
+    // Import Store component to update the avatar of user posts when they change it
+    const { updateUserPosts } = Store()
+
     // handle uploading an avatar
     const handleUploadAvatar = (error, file) => {
         // Close the current dialog
@@ -100,6 +106,12 @@ function UserProfileImage(props) {
                     db.collection("members").doc(loggedUser.id).update({
                         avatar: url
                     })
+
+                    // update the user's posts avatar
+                    const newAvatarValue = {
+                        "user.avatar": url
+                    }
+                    updateUserPosts(loggedUser.id, newAvatarValue)
                     setProgress(0)
                 })
         }

@@ -45,7 +45,7 @@ const useStyles = makeStyles(theme => ({
 
 
 // toggleDetailsHandler => to pass it to active chat when render it alone (in mobiles)
-function ChatItem({ chat, authUserId, chatDocId, handleCloseDetails }) {
+function ChatItem({ chat, authUserId, chatDocId }) {
     const classes = useStyles()
 
     // destructuring the chat
@@ -99,7 +99,6 @@ function ChatItem({ chat, authUserId, chatDocId, handleCloseDetails }) {
     return (
         <ListItem
             // Close details up when click on item
-            onClick={() => handleCloseDetails()}
             button to={{
                 pathname: `/direct/inbox/t/${chatDocId}`, ...(window.innerWidth < 960 ? {
                     state: {

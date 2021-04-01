@@ -10,8 +10,7 @@ import PostCardMedia from '../../common-components/post-components/PostCardMedia
 import PostCardBody from "./PostCardBody"
 import PostCardAction from "./PostCardAction";
 import PopUp from '../../common-components/PopUp'
-import CustomPopper from '../../common-components/ui/CustomPopper'
-import UserProfileOverview from "../../common-components/user-related/UserProfileOverview";
+
 
 // Contexts
 import { AuthedUser } from "../../user-context/AuthedUserContext";
@@ -26,6 +25,7 @@ const useStyles = makeStyles(theme => ({
     postCard: {
         position: "relative",
         marginBottom: 20,
+        overflow: "visible",
         "&::-webkit-scrollbar": {
             background: "#fff",
             width: 2,
@@ -50,14 +50,12 @@ export default function PostCard({ post, docId }) {
     // State vars
     const [postActionsModal, setPostActionsModal] = useState({ title: "", isOpen: false })
     const [imageShape, setImageShape] = useState("portrait")
-    // anchor element for the profile overview
-    const [overviewProfileEl, setOverviewProfileEl] = useState(null)
+
 
     // determine if the image is a landscape or portrait to set the post card body height
     useEffect(() => {
         setImageShape(getImageShape(media[0]))
     }, [media])
-
 
     // handle modal Opening
     const handleModalOpen = () => {
@@ -83,46 +81,19 @@ export default function PostCard({ post, docId }) {
         caption: caption,
         docId,
         likedBy,
-        post
+        post,
     }
 
-    // handle reset the profile overview element
-    const closeProfileOverview = () => {
-        setTimeout(() => {
-            setOverviewProfileEl(null)
-        }, 500)
-    }
-
-    // handle add the profile overview element
-    const showProfileOverview = (e) => {
-        setTimeout(() => {
-            setOverviewProfileEl(e.target)
-        }, 500)
-    }
-
-    // props for profile overview popper
-    const profileOverviewPopperProps = {
-        anchorEl: overviewProfileEl,
-        placement: "bottom-start",
-        portal: true,
-    }
 
     return (
         <>
             <Card className={classes.postCard} variant="outlined">
                 <PostCardHeader
-                    showProfileOverview={showProfileOverview}
-                    closeProfileOverview={closeProfileOverview}
                     location={location}
                     handleOpenModal={handleModalOpen}
                     creatorInfo={user} />
                 <PostCardMedia additionalClass={imageShape} postMedia={media} />
                 <PostCardBody {...cardBodyProps} />
-
-                {/* User profile Popper */}
-                <CustomPopper {...profileOverviewPopperProps}>
-                    <UserProfileOverview closeProfileOverview={closeProfileOverview} user={user} />
-                </CustomPopper>
 
                 {/* Add comment handling */}
                 <PostCardAction user={user} docId={docId} />
@@ -132,9 +103,6 @@ export default function PostCard({ post, docId }) {
             <PopUp {...popUpProps}>
                 <PostSettingsList postCreator={user} postId={docId} closeHandle={handleModalOpen} />
             </PopUp>
-
-
-
         </>
     )
 }

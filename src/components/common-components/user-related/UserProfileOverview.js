@@ -14,6 +14,8 @@ import IF from '../utilities/IF'
 // component imports
 import UserStatistics from './../../app-components/pages/user-profile/user-details-section/UserStatistics'
 import NormalUserActions from '../../app-components/pages/user-profile/user-details-section/NormalUserActions';
+import Store from '../firebase/Store';
+import UserPost from '../post-components/UserPost'
 
 
 // Contexts
@@ -21,7 +23,9 @@ const useStyles = makeStyles(theme => ({
     wrapper: {
         flexDirection: "column",
         minWidth: 400,
-        paddingBottom: 10
+        paddingBottom: 2,
+        // borderRadius: 22,
+        boxShadow: "0 0 3px 0 rgba(0,0,0,0.1)"
     },
     info: {
         display: "flex",
@@ -45,7 +49,7 @@ const useStyles = makeStyles(theme => ({
 // styles
 
 
-function UserProfileOverview({ user, closeProfileOverview }) {
+function UserProfileOverview({ user }) {
     const classes = useStyles()
     const loggedUser = AuthedUser()
 
@@ -53,15 +57,29 @@ function UserProfileOverview({ user, closeProfileOverview }) {
     const { avatar, fullName, username, id } = user
 
     // State vars
+    const [latestPosts, setLatestPosts] = useState([])
 
-    // Fetch the user when as username changes
+
+    // Import Store component to get latest posts
+    const { getLatestUserPosts, loading } = Store()
+
+    // Fetch the user latest 3 videos
     useEffect(() => {
-
+        // get latest 3 videos
+        getLatestUserPosts(id, 3, setLatestPosts)
     }, [])
 
 
+    // map through posts
+    const mappedPosts = latestPosts.map(pst => {
+        const { id: docId, post } = pst
+        return <UserPost post={post} id={docId} userId={id} cardHeight={130} />
+    })
+
+
+    if (loading) return null
     return (
-        <Paper elevation={5} onMouseLeave={closeProfileOverview} className={classes.wrapper}>
+        <Paper variant="outlined" className={classes.wrapper}>
             {/* main Info - avatar - name - site */}
             <CardContent>
                 <Grid container>
@@ -89,6 +107,9 @@ function UserProfileOverview({ user, closeProfileOverview }) {
             <Divider />
 
             {/* latest 3 posts */}
+            <Grid container>
+                {mappedPosts}
+            </Grid>
 
 
             {/* actions with the user - message - follow or un follow */}
