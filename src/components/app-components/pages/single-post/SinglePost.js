@@ -28,19 +28,20 @@ function SinglePost() {
     // get post id from params
     const { postId, userId } = useParams()
 
-    // Import single post function from store
+    // Import single post handler from the Store component
     const { getPost } = Store()
 
     // State vars
     const [post, setPost] = useState("not exist")
 
 
-    // fetch the post from server when the component renders
+    // fetch the post from the server when the component renders
+    // async used because we deal with promises
     useEffect(async () => {
         setPost(await getPost(userId, postId))
     }, [postId])
 
-    if (post == undefined) return <Redirect push to="/" />
+    if (post == undefined) return <Redirect to="/" />
     else {
         if (post == "not exist") return null
         return (

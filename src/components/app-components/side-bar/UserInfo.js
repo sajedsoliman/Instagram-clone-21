@@ -22,7 +22,7 @@ function UserInfo() {
     const { avatar, fullName, username } = loggedUser
 
     return (
-        <Box display="flex" alignItems="center" flexDirection="row" height="100%">
+        <Box display="flex" alignItems="center" flexDirection="row" height="100%" marginBottom={2}>
             <Avatar className={classes.avatar} src={avatar} />
             <Box className={classes.infoBox}>
                 <Typography className={classes.fullName} variant="h6" color="textPrimary">{fullName}</Typography>

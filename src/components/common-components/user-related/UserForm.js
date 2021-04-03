@@ -3,8 +3,12 @@ import { Button, CircularProgress, Grid, makeStyles, Typography } from "@materia
 
 // component imports
 import Controls from "../controls/Controls"
+
+// Firebase imports
 import { auth } from "../firebase/database"
-import { Form } from "../useForm"
+
+// Hooks
+import { Form } from "../hooks/useForm"
 
 // Contexts
 import { useAlert } from "../../notification-context/NotificationContext"

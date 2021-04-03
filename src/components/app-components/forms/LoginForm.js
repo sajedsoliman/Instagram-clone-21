@@ -5,17 +5,18 @@ import { useHistory, useLocation } from 'react-router-dom'
 import { Button, makeStyles } from "@material-ui/core"
 
 // component imports
-import { useForm } from "../../common-components/useForm"
 import UserForm from "../../common-components/user-related/UserForm"
 import Store from "../../common-components/firebase/Store"
 import CompleteSignIn from './CompleteSignIn'
+
+// Hooks
+import { useForm } from "../../common-components/hooks/useForm"
 
 // Utilities
 import IF from '../../common-components/utilities/IF'
 
 // Service
 import { auth, firebase } from '../../common-components/firebase/database'
-import { validation } from "./functions"
 import { userInitialValues } from '../serviceInfo'
 
 

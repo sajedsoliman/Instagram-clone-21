@@ -4,14 +4,21 @@ import { useEffect, useState } from 'react'
 import { makeStyles, Typography } from '@material-ui/core'
 
 // Component imports
-import { useForm, Form } from '../../../../../common-components/useForm'
-import { AuthedUser } from '../../../../../user-context/AuthedUserContext'
 import CommonButton from '../../../../../common-components/CommonButton'
 import RowFormGroup from '../controls/RowFormGroup'
 import UserProfileImage from '../../user-details-section/UserProfileImage'
-import TwoColumnGrid from '../utilites/TwoColumnGrid'
 import Store from '../../../../../common-components/firebase/Store'
+
+// Utilities
 import { validation } from '../../../../forms/functions'
+import TwoColumnGrid from '../utilites/TwoColumnGrid'
+
+// Hooks
+import { useForm, Form } from '../../../../../common-components/hooks/useForm'
+
+// Contexts
+import { AuthedUser } from '../../../../../user-context/AuthedUserContext'
+
 
 // style
 const useStyles = makeStyles(theme => ({

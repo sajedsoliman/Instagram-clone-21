@@ -1,26 +1,38 @@
+// In this component you will find all functions that deal with firebase (backend), like: get, update, delete records
+
 import { useState } from "react";
-import { useHistory } from "react-router";
+import { useHistory, Link as RouterLink } from "react-router-dom";
 
 // Firebase imports
-import { db, auth, storage, firebase, admin } from "./database";
+import { db, auth, firebase } from "./database";
 
-// component imports
+// Material-UI
+import { Button } from "@material-ui/core";
+
+// Contexts
 import { useAlert } from "../../notification-context/NotificationContext";
 import { AuthedUser } from "../../user-context/AuthedUserContext";
 
-// Algolia
+// Algolia (Search platform. firebase doesn't have search functionality to use regex in searching) - Start
 import algoliasearch from 'algoliasearch'
-import TextField from '@material-ui/core/TextField'
+
+// notistack imports (for snackbars)
+import { useSnackbar } from 'notistack';
+
 
 const ALGOLIA_INDEX_NAME = 'members';
 const client = algoliasearch("CR5WXH0CH1", "a1209f3db13e2a909434e3edb487e3b9");
 const index = client.initIndex(ALGOLIA_INDEX_NAME)
 
 index.setSettings({ searchableAttributes: ["username", "fullName"], exactOnSingleWordQuery: false })
+// Algolia - End
 
 function Store() {
-    // For notification
+    // processSettings is the function that controls the type and the message of an alert
+    // and I called it like this because we show alert when perform a certain process (like update, delete, and add)
     const processSettings = useAlert()
+
+    // Get the current logged user
     const loggedUser = AuthedUser()
 
     // Router
@@ -28,7 +40,10 @@ function Store() {
 
     // State vars
     const [loading, setLoading] = useState(false)
-    const [posts, setPosts] = useState([])
+
+    // Import notiStack snackBars
+    const { enqueueSnackbar } = useSnackbar()
+
 
     // send a notification - put it here so I con access it anywhere
     const handleSendNotification = (userId, text, link, avatar = loggedUser.avatar, variant = "warning") => {
@@ -392,7 +407,7 @@ function Store() {
     }
 
     // Get suggested posts
-    const getSuggestedPosts = (userId, activePostId) => {
+    const getSuggestedPosts = (userId, activePostId, setPosts) => {
         db.collection("posts")
             .doc(userId)
             .collection("user_posts")
@@ -744,7 +759,7 @@ function Store() {
             .then(snapshot => console.log(snapshot.empty)) */
     }
 
-    /*     // handle see the user's last msg
+    /* // handle see the user's last msg
         const handleLastMsgSeen = (chatId) => {
             db.collection("members")
                 .doc(loggedUser.id)
@@ -861,6 +876,44 @@ function Store() {
             })
     }
 
+    // handle show notifications if users are active (in the app)
+    const handleShowNotifications = () => {
+        return db.collection("members")
+            .doc(loggedUser.uid)
+            .collection("notifications")
+            .onSnapshot(snapshot => {
+                // Just get the documents that have been changed
+                snapshot.docChanges()
+                    .forEach(change => {
+                        // if the change type is that a document has been added
+                        // show the alert and change its show to true
+                        if (change.type == "added") {
+                            const docData = change.doc.data()
+                            if (!docData.show) {
+                                const { text, link, variant } = docData
+                                enqueueSnackbar(text, {
+                                    anchorOrigin: {
+                                        horizontal: "right",
+                                        vertical: "bottom"
+                                    },
+                                    action: (
+                                        // click on go button will set the seen state to true
+                                        <Button to={link}
+                                            onClick={() => handleSeenNotification(change.doc.id)} component={RouterLink}>Go</Button>
+                                    ),
+                                    variant,
+                                    resumeHideDuration: 1000,
+                                    autoHideDuration: 2500
+                                })
+
+                                // Update it
+                                change.doc.ref.update({ show: true })
+                            }
+                        }
+                    })
+            })
+    }
+
     // handle get latest user's 3 posts
     const getLatestUserPosts = (userId, postsCount, setLatestPosts) => {
         setLoading(true)
@@ -877,10 +930,39 @@ function Store() {
             })
     }
 
+    // handle get logged user suggested users
+    const getSuggestedUsers = (setUsers) => {
+        // Get the logged user following users
+        /*  db
+             .collection("members")
+             .doc(loggedUser.id)
+             .collection("following")
+             .get()
+             .then(followings => {
+                 const followedIds = [...followings.docs.map(doc => doc.data().id), loggedUser.uid]
+ 
+                 // Fetch following users friends (followers)
+                 let suggestedUsers = []
+                 followedIds.forEach(async id => {
+                     const followers = db.collection("members")
+                         .doc(id)
+                         .collection("followers")
+                         .where("id", "not-in", followedIds)
+                         .get()
+                         .then(followers => {
+                             return followers.docs.map(follower => follower.data())
+                         })
+                     suggestedUsers.push(followers)
+                 })
+                 suggestedUsers.forEach(async user => {
+                     console.log(...await user)
+                 })
+             }) */
+    }
+
 
 
     return {
-        posts,
         getUser,
         getSuggestedPosts,
         updateUser,
@@ -918,8 +1000,10 @@ function Store() {
         handleInformFriendsNewPost,
         getNotifications,
         handleSeenNotification,
+        handleShowNotifications,
         getLatestUserPosts,
         updateUserPosts,
+        getSuggestedUsers,
         loading,
     }
 }

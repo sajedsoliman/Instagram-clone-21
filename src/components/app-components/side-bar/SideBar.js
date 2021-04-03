@@ -1,9 +1,11 @@
-// Material-Ui imports
-import { Button, makeStyles, Typography } from '@material-ui/core'
 import { useRef, useState } from 'react'
+
+// Material-Ui imports
+import { makeStyles, Typography } from '@material-ui/core'
 
 // Component imports
 import UserInfo from './UserInfo'
+import UserSuggestions from './UserSuggestions'
 
 // styles
 const useStyles = makeStyles(theme => ({
@@ -11,7 +13,7 @@ const useStyles = makeStyles(theme => ({
         display: "flex",
         flexDirection: "column",
         minHeight: 400,
-        justifyContent: "space-between",
+        // Margin for mobile screens
         marginBottom: 50,
 
         // because I removed padding from container in small screen just like instagram :)
@@ -30,7 +32,8 @@ function SideBar() {
             {/* user info (avatar, name) */}
             <UserInfo />
 
-            {/* users suggestions */}
+            {/* user suggestions */}
+            <UserSuggestions />
 
 
             {/* Footer */}

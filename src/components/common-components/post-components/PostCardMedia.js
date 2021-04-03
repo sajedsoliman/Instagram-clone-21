@@ -49,7 +49,7 @@ function PostCardMedia({ postMedia, additionalClass }) {
         showNav: false,
         showThumbnails: false,
         showFullscreenButton: true,
-        useBrowserFullscreen: false,
+        useBrowserFullscreen: true,
         showIndex: postMedia.length == 1 ? false : true,
         showBullets: postMedia.length == 1 ? false : true,
         showPlayButton: false,

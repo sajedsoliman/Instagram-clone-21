@@ -5,19 +5,23 @@ import { useHistory } from 'react-router-dom'
 import Controls from '../../../common-components/controls/Controls'
 import UploadPostMedia from './UploadPostMedia'
 import StepActions from '../../../common-components/StepActions'
-import { useForm } from '../../../common-components/useForm'
-import { AuthedUser } from '../../../user-context/AuthedUserContext'
-import { useAlert } from '../../../notification-context/NotificationContext'
+import StepperActions from './StepperActions'
+import Store from '../../../common-components/firebase/Store'
 import AppPage from '../AppPage'
 
+// Hooks
+import { useForm } from '../../../common-components/hooks/useForm'
+
+
+// Contexts
+import { AuthedUser } from '../../../user-context/AuthedUserContext'
+import { useAlert } from '../../../notification-context/NotificationContext'
 
 // Material-UI imports
 import { makeStyles, LinearProgress, Container, Paper, Typography } from '@material-ui/core'
 
 // firebase database
 import { storage, db, firebase } from '../../../common-components/firebase/database'
-import StepperActions from './StepperActions'
-import Store from '../../../common-components/firebase/Store'
 
 // style
 const useStyles = makeStyles(theme => ({
@@ -73,7 +77,14 @@ function CreatePost() {
 
     // handle upload a post
     useEffect(() => {
+        // Check if all media got uploaded and we are in the last step
         if (mediaUrls.length == postInfo.media.length && currentStep != 0) {
+            const postCreator = {
+                fullName: user.fullName,
+                id: user.uid,
+                username: user.username,
+                avatar: user.avatar || "",
+            }
             db.
                 collection('posts')
                 .doc(user.uid)
@@ -83,12 +94,7 @@ function CreatePost() {
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         media: mediaUrls,
                         caption: postInfo.caption,
-                        user: {
-                            fullName: user.fullName,
-                            id: user.uid,
-                            username: user.username,
-                            avatar: user.avatar || "",
-                        },
+                        user: { ...postCreator },
                         location: postInfo.location ? postInfo.location : "" /* To use an api to spot the location */,
                         likedBy: []
                     }

@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react";
 import { Link as RouterLink } from 'react-router-dom'
 
 
 // Material-Ui imports
 import { Avatar, CardActions, CardContent, Container, Divider, Grid, Link, makeStyles, Paper, Typography } from "@material-ui/core";
-import { useEffect, useState } from "react";
 
 // Contexts
 import { AuthedUser } from '../../user-context/AuthedUserContext';
@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
         flexDirection: "column",
         minWidth: 400,
         paddingBottom: 2,
-        // borderRadius: 22,
+        borderRadius: 22,
         boxShadow: "0 0 3px 0 rgba(0,0,0,0.1)"
     },
     info: {

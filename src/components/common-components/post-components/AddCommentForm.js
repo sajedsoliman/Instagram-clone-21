@@ -53,7 +53,7 @@ function AddCommentForm(props) {
         }
 
         // handle add the comment
-        AddComment(user.id, comment, docId, setText, user.avatar)
+        AddComment(user.id, comment, docId, setText, loggedUser.avatar)
     }
 
     return (

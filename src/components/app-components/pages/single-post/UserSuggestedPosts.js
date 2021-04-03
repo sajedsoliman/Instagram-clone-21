@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 
 // UI imports
-import { Divider, Grid, makeStyles, Typography } from '@material-ui/core'
+import { Grid, makeStyles, Typography } from '@material-ui/core'
 
 // component
-import Store from "../../../common-components/firebase/Store"
 import UserPost from '../../../common-components/post-components/UserPost'
+import Store from "../../../common-components/firebase/Store"
 
 // style stuff
 const useStyles = makeStyles(theme => ({
@@ -32,13 +32,16 @@ function UserSuggestedPosts(props) {
     // destructuring props
     const { userId, activePostId, postCreator } = props
 
-    // Fetch posts on mounted
-    useEffect(() => {
-        getSuggestedPosts(userId, activePostId)
-    }, [activePostId])
+    // State vars
+    const [posts, setPosts] = useState([])
 
-    // Fetch some posts for this user - import Store component to do that
-    const { posts, getSuggestedPosts } = Store()
+    // import Store component to fetch some posts for this user
+    const { getSuggestedPosts } = Store()
+
+    // Fetch posts as the post changes
+    useEffect(() => {
+        getSuggestedPosts(userId, activePostId, setPosts)
+    }, [activePostId])
 
     // mapping through posts
     const mappedPosts = posts.map(pst => {

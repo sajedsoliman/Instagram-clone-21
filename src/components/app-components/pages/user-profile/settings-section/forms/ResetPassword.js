@@ -1,14 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Material imports
-import { makeStyles, Typography } from '@material-ui/core'
+import { Fade, makeStyles, Slide, Typography } from '@material-ui/core'
 
 // component imports
-import { Form } from '../../../../../common-components/useForm'
 import Store from '../../../../../common-components/firebase/Store'
 import RowFormGroup from '../controls/RowFormGroup'
 import CommonButton from '../../../../../common-components/CommonButton'
-import { AuthedUser } from '../../../../../user-context/AuthedUserContext'
+
+// Hooks
+import { Form } from '../../../../../common-components/hooks/useForm'
+
+// Contexts
 
 // styles
 const useStyles = makeStyles({
@@ -24,18 +27,26 @@ function ResetPassword() {
     const [password, setPassword] = useState({ new: "", confirm: "" })
     const [error, setError] = useState("")
 
-    // import firebase functions
+    // import Store component to update passwords
     const { updatePassword } = Store()
+
+    // Put a listener on the error message that will reset the error after 3 seconds
+    useEffect(() => {
+        if (error !== "") {
+            setTimeout(() => {
+                setError("")
+            }, 3000)
+        }
+    }, [error])
 
     // handle update user (submit form)
     const handleSubmitForm = () => {
+        // Set new property to newPass, because new is unique symbol
         const { new: newPass, confirm } = password
         const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?=.*[a-zA-Z]).{8,}$/
 
         // Check if password follow the rules
         if (passwordRegex.test(newPass)) {
-            // reset error
-            setError("")
 
             if (newPass != confirm) {
                 setError("Passwords are not identical")
@@ -54,8 +65,8 @@ function ResetPassword() {
         }
     }
 
-    // handle new password change
-    const handlePasswordChange = (e) => {
+    // handle new password input change
+    const handlePasswordInputChange = (e) => {
         const { value, name } = e.target
         setPassword(prev => ({ ...prev, [name]: value }))
     }
@@ -63,14 +74,16 @@ function ResetPassword() {
     // control props
     const inputProps = (value, name, helperText) => ({
         value,
-        inputChange: handlePasswordChange,
+        inputChange: handlePasswordInputChange,
         name,
         helperText
     })
 
     return (
         <Form onSubmit={handleSubmitForm}>
-            <Typography className={classes.errMsg} color="error">{error}</Typography>
+            <Fade in={error !== ""}>
+                <Typography className={classes.errMsg} color="error">{error}</Typography>
+            </Fade>
 
             {/* New Password */}
             <RowFormGroup label="New Password"

@@ -68,7 +68,7 @@ function FullScreenPostBody(props) {
             <PostCardHeader handleOpenModal={handleModalOpen} creatorInfo={user} location={location} />
             {/* I wrapped it here to add padding cuz i didn't in the caption components */}
             <CardContent className={classes.captionWrapper}>
-                <PostCaption caption={caption} username={user.username} />
+                <PostCaption user={user} caption={caption} username={user.username} />
             </CardContent>
             <PostComments comments={comments} />
             <FullscreenPostActions commentsCount={comments.length} post={post} postId={postId} />

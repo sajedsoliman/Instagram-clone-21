@@ -8,7 +8,7 @@ import UserForm from "../../common-components/user-related/UserForm"
 import Store from "../../common-components/firebase/Store"
 
 // Hooks
-import { useForm } from "../../common-components/useForm"
+import { useForm } from "../../common-components/hooks/useForm"
 
 // service
 import { validation } from "./functions"
