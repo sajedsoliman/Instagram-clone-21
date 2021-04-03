@@ -15,6 +15,9 @@ import ChatHeader from './ChatHeader'
 import ChatMessages from './ChatMessages'
 import ChatDetails from './ChatDetails'
 
+
+import { db } from '../../../../common-components/firebase/database'
+
 function ActiveChat() {
     const layout = Layout()
 
@@ -56,6 +59,22 @@ function ActiveChat() {
 
         return () => {
             unsubscribe()
+
+            db.collection("members")
+                .doc(loggedUser.uid)
+                .collection("chats")
+                .doc(chatId)
+                .get()
+                .then(chatDoc => {
+                    const setToMember = chatDoc.data().members.find(member => member.id != loggedUser.uid)
+
+                    // Set in chat state to false for the other user
+                    db.collection("members")
+                        .doc(setToMember.id)
+                        .collection("chats")
+                        .doc(chatId)
+                        .update({ inChat: false })
+                })
         }
     }, [chatId])
 

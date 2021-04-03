@@ -460,25 +460,24 @@ function Store() {
 
                 // handle update the seen status for the logged user
                 snapshot.ref.update({
-                    seen: true
+                    seen: true,
                 })
 
+                const senToUser = snapshot.data().members.find(member => member.id != userId)
                 // handle see the other user message
-                if (snapshot.data().lastMsg.id != userId) {
-                    const senToUser = snapshot.data().members.find(member => member.id != userId)
-                    db.collection("members")
-                        .doc(senToUser.id)
-                        .collection("chats")
-                        .doc(chatId)
-                        .get()
-                        .then(chatDoc => {
-                            if (chatDoc.exists) {
-                                chatDoc.ref.update({
-                                    lastMsgSeen: true,
-                                })
-                            }
-                        })
-                }
+                db.collection("members")
+                    .doc(senToUser.id)
+                    .collection("chats")
+                    .doc(chatId)
+                    .get()
+                    .then(chatDoc => {
+                        if (chatDoc.exists) {
+                            chatDoc.ref.update({
+                                lastMsgSeen: true,
+                                inChat: true,
+                            })
+                        }
+                    })
             })
 
         return unsubscribe
@@ -508,6 +507,7 @@ function Store() {
             seen: false,
             isTyping: false,
             lastMsg,
+            inChat: false,
             members: [
                 {
                     id: userId,
@@ -534,6 +534,7 @@ function Store() {
             isMuted: false,
             lastMsg: {},
             lastMsgSeen: false,
+            inChat: false,
             members: [
                 {
                     id: loggedUser.id,
@@ -592,6 +593,12 @@ function Store() {
             .doc(chatId)
             .get()
             .then(chatDoc => {
+                chatDoc
+                    .ref
+                    .collection("messages")
+                    .add(messageObj)
+
+                // handle send him a notification
                 // Check if the other user is already inside of the chat or not
                 // because if they inside the chat, there ain't no need to send them
                 // a notification
@@ -599,16 +606,12 @@ function Store() {
                 // another noti
                 // Check if the message and the new message has a gap in time >= 600 seconds(10 mins)
                 const isThereEnoughGap = ((new Date().getTime() / 1000) - (chatDoc.data().lastMsg.sendDate.seconds)) >= 60
-                if (chatDoc.exists && !chatDoc.data().lastMsgSeen && isThereEnoughGap) {
+                if (chatDoc.exists && !chatDoc.data().inChat && isThereEnoughGap) {
                     // If the other user hasn't seen it send them a notification
                     handleSendNotification(senToId,
                         `${loggedUser.fullName} has sent you a message`,
                         `direct/inbox/t/${chatId}`)
                 }
-                chatDoc
-                    .ref
-                    .collection("messages")
-                    .add(messageObj)
             })
 
 
@@ -641,7 +644,6 @@ function Store() {
                     .ref
                     .collection("messages")
                     .add(messageObj)
-                    // handle send him a notification
                     .then(_ => {
 
                     })
@@ -933,31 +935,33 @@ function Store() {
     // handle get logged user suggested users
     const getSuggestedUsers = (setUsers) => {
         // Get the logged user following users
-        /*  db
-             .collection("members")
-             .doc(loggedUser.id)
-             .collection("following")
-             .get()
-             .then(followings => {
-                 const followedIds = [...followings.docs.map(doc => doc.data().id), loggedUser.uid]
- 
-                 // Fetch following users friends (followers)
-                 let suggestedUsers = []
-                 followedIds.forEach(async id => {
-                     const followers = db.collection("members")
-                         .doc(id)
-                         .collection("followers")
-                         .where("id", "not-in", followedIds)
-                         .get()
-                         .then(followers => {
-                             return followers.docs.map(follower => follower.data())
-                         })
-                     suggestedUsers.push(followers)
-                 })
-                 suggestedUsers.forEach(async user => {
-                     console.log(...await user)
-                 })
-             }) */
+        db
+            .collection("members")
+            .doc(loggedUser.id)
+            .collection("following")
+            .get()
+            .then(async followings => {
+                // Users that I follow (have followed)
+                let followedIds = [...followings.docs.map(doc => doc.data().id)]
+
+                // Fetch following users friends (followers)
+                followedIds.forEach(async id => {
+                    let result = db.collection("members")
+                        .doc(id)
+                        .collection("following")
+                        .where("id", "not-in", [...followedIds, loggedUser.id])
+                        .get()
+                        .then(friends => {
+                            const mappedFriends = friends.docs.map(friend => friend.data())
+                            setUsers(prev => {
+                                // Check if one of the friends is already suggested
+                                return [...prev, ...mappedFriends.filter(friend => !followedIds.includes(friend.id))]
+                            })
+                            // If suggested someone put them in followedIds list so that avoid suggesting them again
+                            followedIds.push(...friends.docs.map(friend => friend.data().id))
+                        })
+                })
+            })
     }
 
 
