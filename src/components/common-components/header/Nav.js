@@ -100,7 +100,6 @@ export default function Nav({ navClassName }) {
     // Import Store component to get chats
     const { getUserChats, getNotifications } = Store()
 
-
     // a Listener to listen the user chats' changes
     useEffect(() => {
         if (user != null && user != "no user") {

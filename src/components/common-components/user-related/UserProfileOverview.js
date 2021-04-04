@@ -69,11 +69,10 @@ function UserProfileOverview({ user }) {
         getLatestUserPosts(id, 3, setLatestPosts)
     }, [])
 
-
     // map through posts
     const mappedPosts = latestPosts.map(pst => {
         const { id: docId, post } = pst
-        return <UserPost post={post} id={docId} userId={id} cardHeight={130} />
+        return <UserPost key={docId} post={post} id={docId} userId={id} cardHeight={130} />
     })
 
 

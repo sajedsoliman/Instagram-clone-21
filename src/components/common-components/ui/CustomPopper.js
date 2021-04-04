@@ -1,61 +1,72 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 
-// Material-UI imports
-import { makeStyles, Popper, Paper, Grow } from '@material-ui/core'
-import clsx from "clsx"
+// Material-UI imports 
+import { Fade, makeStyles, Popper } from '@material-ui/core'
+// Icons
+import { } from '@material-ui/icons'
 
-// Popper imports
+// Contexts
+
+// Hooks
+
+// Components
 import { usePopper } from 'react-popper'
 
-// styles
-const useStyles = makeStyles((theme) => ({
+// Styles
+import clsx from 'clsx'
+const useStyles = makeStyles(theme => ({
     popper: {
-        "&[x-placement*='top'] > .arrow": {
-            bottom: -2,
+        "&[x-placement*=top] .arrow": {
+            bottom: -5,
+            top: "auto"
+        },
+        "&[x-placement*=right] .arrow": {
+            bottom: -5,
             top: "auto"
         },
     },
-    arrowEl: {
-        width: 15,
-        height: 15,
-        top: -2,
+    wrapper: {
+        padding: 20
+    },
+    btn: {
+        marginTop: 350,
+        marginLeft: 200
+    },
+    arrow: {
+        background: "white", /* rgb(224 224 224) */
+        width: 10,
+        height: 10,
         transform: "rotateZ(45deg)",
-        background: "white",
+        top: -4,
+        left: -4
     }
+
 }))
 
-
-export default function MenuListCom(props) {
-    // destructuring props
-    const { anchorEl, open, placement = "top-end", popperClassName, children, withArrow = true, portal } = props
+export default function CustomPopper({ anchorEl, placement, withArrow = false, children }) {
     const classes = useStyles()
 
-    // get arrow styles from usePopper hook
-    const { styles, attributes } = usePopper()
-
-    // State vars
     const [arrowEl, setArrowEl] = useState(null)
 
-    const popperProps = {
-        open: open != undefined ? open : Boolean(anchorEl),
-        anchorEl: anchorEl,
-        transition: true,
-        className: clsx(popperClassName, classes.popper),
-        modifiers: {
-            flip: {
-                enabled: true,
-            },
-        },
-        // placement
-    }
+    const { styles } = usePopper()
 
     return (
-        <Popper popperOptions={{ placement: "bottom-start" }} {...popperProps} disablePortal={!portal}>
-            <Grow in={open || Boolean(anchorEl)}>
-                <>
-                    {children}
-                </>
-            </Grow>
-        </Popper>
+        <>
+
+            <Popper className={classes.popper} modifiers={{
+                arrow: {
+                    enabled: withArrow,
+                    element: arrowEl
+                }
+            }} placement={placement} open={Boolean(anchorEl)} anchorEl={anchorEl} transition={true}>
+                <Fade in={Boolean(anchorEl)}>
+                    <>
+                        {children}
+                        <span ref={setArrowEl} className={clsx(classes.arrow, "arrow")} style={{ ...styles.arrow }}></span>
+                    </>
+                </Fade>
+            </Popper>
+        </>
+
     )
 }

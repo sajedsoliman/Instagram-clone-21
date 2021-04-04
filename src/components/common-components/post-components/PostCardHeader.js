@@ -60,7 +60,6 @@ function PostCardHeader({ creatorInfo, location, handleOpenModal }) {
     const profileOverviewPopperProps = {
         placement: "bottom-start",
         portal: true,
-        withArrow: true
     }
 
     // card header props

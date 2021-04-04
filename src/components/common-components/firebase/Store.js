@@ -75,7 +75,7 @@ function Store() {
             })
     }
 
-    // handle update user posts details when it gets changed
+    // handle update user posts details when the user gets changed
     const updateUserPosts = (userId, newValues) => {
         db
             .collection("posts")
@@ -230,11 +230,66 @@ function Store() {
         return isAvailable
     }
 
+    // Update the user info at their followers when they get changed
+    const updateUserInfoAtFollowers = (newValues) => {
+        db
+            .collection("members")
+            .doc(loggedUser.uid)
+            .collection("followers")
+            .get()
+            .then(loggedUserFollowers => {
+                loggedUserFollowers.forEach(followerDoc => {
+                    const followerId = followerDoc.data().id
+                    db
+                        .collection("members")
+                        .doc(followerId)
+                        .collection("following")
+                        .where("id", "==", loggedUser.uid)
+                        .get()
+                        .then(loggedUserInstanceAtFollower => {
+                            loggedUserInstanceAtFollower
+                                .docs[0]
+                                .ref
+                                .update(newValues)
+                        })
+                })
+            })
+    }
+
+    // Update the user info at their followers when they get changed
+    const updateUserInfoAtFollowing = (newValues) => {
+
+        db
+            .collection("members")
+            .doc(loggedUser.uid)
+            .collection("following")
+            .get()
+            .then(loggedUserFollowings => {
+                loggedUserFollowings.forEach(FollowingDoc => {
+                    const FollowingId = FollowingDoc.data().id
+                    db
+                        .collection("members")
+                        .doc(FollowingId)
+                        .collection("followers")
+                        .where("id", "==", loggedUser.uid)
+                        .get()
+                        .then(loggedUserInstanceAtFollowing => {
+                            loggedUserInstanceAtFollowing
+                                .docs[0]
+                                .ref
+                                .update(newValues)
+                        })
+                })
+            })
+    }
+
     // Update user
     const updateUser = async (userNew) => {
         // Check if the user hasn't changed their info to avoid going to the database
         const isChanged = !(loggedUser == userNew)
         if (!isChanged) return processSettings("warning", "Change something to submit")
+
+
 
         // update the user if anything has changed but we specially need to check for the username
         // availability
@@ -244,17 +299,25 @@ function Store() {
             isUsernameAvailable = Boolean(await isUsernameExisted(userNew.username))
         }
 
-        // If the username is vacant update it or if it didn't change
+        // If the username is available update it or if it didn't change
         if ((loggedUser.username == userNew.username) || isUsernameAvailable) {
             // update all user posts with new info
             // Check if either username or fullName has changed
             if (userNew.username !== loggedUser.username || userNew.fullName !== loggedUser.fullName) {
                 // Update them
-                const newUserPostValue = {
+                const newUserPostValues = {
                     "user.fullName": userNew.fullName,
                     "user.username": userNew.username
                 }
-                updateUserPosts(loggedUser.id, newUserPostValue)
+                updateUserPosts(loggedUser.id, newUserPostValues)
+
+                // update this user info at their following and followers
+                const newUserValues = {
+                    fullName: userNew.fullName,
+                    username: userNew.username,
+                }
+                updateUserInfoAtFollowers(newUserValues)
+                updateUserInfoAtFollowing(newUserValues)
             }
 
             db.collection("members")
