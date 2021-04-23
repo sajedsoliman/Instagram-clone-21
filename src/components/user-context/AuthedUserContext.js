@@ -13,7 +13,6 @@ export function AuthedUserProvider({ children }) {
     const [authUser, setAuthUser] = useState(null)
 
     useEffect(() => {
-        // auth.signOut()
         auth.onAuthStateChanged(authedUser => {
             if (authedUser) {
                 // Destructuring the authed user
@@ -22,13 +21,9 @@ export function AuthedUserProvider({ children }) {
                     .doc(authedUser.uid)
                     .onSnapshot(userDoc => {
                         if (userDoc.exists && authedUser != null) {
-                            userDoc.ref.update({
-                                active: true
-                            }).then(_ => {
-                                const fetchedUser = userDoc.data()
-                                // setAuthUser({ ...fetchedUser, uid: authedUser.uid })
-                                setAuthUser({ ...fetchedUser, uid: authedUser.uid })
-                            })
+                            const fetchedUser = userDoc.data()
+
+                            setAuthUser({ ...fetchedUser, uid: authedUser.uid })
                         }
                     })
             } else {

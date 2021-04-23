@@ -13,6 +13,7 @@ import { AuthedUser } from '../../user-context/AuthedUserContext'
 import { auth, db } from '../../common-components/firebase/database'
 
 // Component imports
+import Store from '../../common-components/firebase/Store'
 
 // Styles
 const useStyles = makeStyles(theme => ({
@@ -34,25 +35,23 @@ function UserProfileMenu({ handleCloseMenu }) {
     // Router
     const location = useLocation()
 
+    // Import Store component to offline the user
+    const { changeUserActiveState } = Store()
+
     // handle logout the user
     const handleLogout = () => {
         auth.signOut()
 
-        // close the popper when logout
-        handleCloseMenu()
 
         // empty the location state
         if (location.state && location.state.user) {
             location.state.user = false
         }
 
-        // update user's active state to false
-        db.collection("members")
-            .doc(loggedUser.uid)
-            .update({
-                active: false
-            })
+        // close the popper when logout
+        handleCloseMenu()
     }
+
 
     // menu link common props
     const menuItemProps = {

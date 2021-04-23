@@ -13,11 +13,12 @@ import { Button } from "@material-ui/core";
 import { useAlert } from "../../notification-context/NotificationContext";
 import { AuthedUser } from "../../user-context/AuthedUserContext";
 
-// Algolia (Search platform. firebase doesn't have search functionality to use regex in searching) - Start
-import algoliasearch from 'algoliasearch'
-
 // notistack imports (for snackbars)
 import { useSnackbar } from 'notistack';
+
+
+// Algolia (Search platform. firebase doesn't have search functionality to use regex in searching) - Start
+import algoliasearch from 'algoliasearch'
 
 
 const ALGOLIA_INDEX_NAME = 'members';
@@ -1027,6 +1028,14 @@ function Store() {
             })
     }
 
+    // update user's active state
+    const changeUserActiveState = (changeTo) => {
+        db.collection("members")
+            .doc(loggedUser.uid)
+            .update({
+                active: changeTo
+            })
+    }
 
 
     return {
@@ -1070,6 +1079,7 @@ function Store() {
         handleShowNotifications,
         getLatestUserPosts,
         updateUserPosts,
+        changeUserActiveState,
         getSuggestedUsers,
         loading,
     }

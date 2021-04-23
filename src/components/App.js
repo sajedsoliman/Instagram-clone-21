@@ -67,7 +67,7 @@ export default function App() {
     const mobile = location.state && location.state.mobile
 
     // Import Store component to show notification like messenger
-    const { handleShowNotifications } = Store()
+    const { handleShowNotifications, changeUserActiveState } = Store()
 
 
     // set a listener for notifications
@@ -79,7 +79,13 @@ export default function App() {
             unsubscribe = handleShowNotifications()
         }
 
+        // If there is a user set them to active(status)
+        if (loggedUser != "no user" && loggedUser.active == false) {
+            changeUserActiveState(true)
+        }
+
         return () => {
+            // unsubscribe notifications
             unsubscribe()
         }
     }, [loggedUser])
