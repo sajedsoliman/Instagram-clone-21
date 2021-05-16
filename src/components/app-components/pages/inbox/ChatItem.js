@@ -59,6 +59,8 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
+// Update
+
 // toggleDetailsHandler => to pass it to active chat when render it alone (in mobiles)
 function ChatItem({ chat, authUserId, chatDocId }) {
 	const classes = useStyles();
