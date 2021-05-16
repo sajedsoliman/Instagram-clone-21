@@ -447,7 +447,7 @@ function Store() {
 					processSettings("success", "Followed");
 					const alertText = `${authUser.fullName} has just followed you`;
 					const alertLink = `${authUser.username}`;
-					handleSendNotification(followedUser.id, alertText, alertLink, followedUser.avatar);
+					handleSendNotification(followedUser.id, alertText, alertLink, authUser.avatar);
 				})
 				.catch((err) => processSettings("error", err.message));
 		} else processSettings("warning", "Login to follow others");
@@ -886,7 +886,7 @@ function Store() {
 				if (userId != loggedUser.id) {
 					const alertText = `${loggedUser.fullName} put a comment for you`;
 					const alertLink = `${userId}/p/${postId}`;
-					handleSendNotification(userId, alertText, alertLink, avatar);
+					handleSendNotification(userId, alertText, alertLink, loggedUser.avatar);
 				}
 			})
 			.catch((err) => processSettings("error", err.message));
@@ -900,10 +900,10 @@ function Store() {
 			.get()
 			.then((followers) => {
 				followers.forEach((follower) => {
-					const { id, avatar } = follower.data();
+					const { id } = follower.data();
 					const alertText = `${loggedUser.fullName} put out a new post`;
 					const alertLink = `${loggedUser.id}/p/${postId}`;
-					handleSendNotification(id, alertText, alertLink, avatar);
+					handleSendNotification(id, alertText, alertLink, loggedUser.avatar);
 				});
 			});
 	};

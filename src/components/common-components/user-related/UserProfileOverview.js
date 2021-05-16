@@ -14,6 +14,7 @@ import {
 	Paper,
 	Typography,
 } from "@material-ui/core";
+import CameraAltOutlined from "@material-ui/icons/CameraAltOutlined";
 
 // Contexts
 import { AuthedUser } from "../../user-context/AuthedUserContext";
@@ -50,6 +51,30 @@ const useStyles = makeStyles((theme) => ({
 			},
 		},
 	},
+	msgWrapper: {
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center",
+		flexDirection: "column",
+		width: "100%",
+		minHeight: 80,
+		padding: "10px 0",
+	},
+	iconWrapper: {
+		display: "flex",
+		justifyContent: "center",
+		alignItems: "center",
+		border: "1px solid black",
+		borderRadius: 100,
+		width: 50,
+		height: 50,
+		marginBottom: 5,
+		"& .MuiSvgIcon-root": {
+			fontSize: 28,
+			margin: 0,
+			padding: 0,
+		},
+	},
 }));
 
 // styles
@@ -71,13 +96,23 @@ function UserProfileOverview({ user }) {
 	useEffect(() => {
 		// get latest 3 videos
 		getLatestUserPosts(id, 3, setLatestPosts);
-	}, [getLatestUserPosts, id]);
+	}, []);
 
 	// map through posts
 	const mappedPosts = latestPosts.map((pst) => {
 		const { id: docId, post } = pst;
 		return <UserPost key={docId} post={post} id={docId} userId={id} cardHeight={130} />;
 	});
+
+	// When a user doesn't have any posts
+	const noPostsMessage = (
+		<div className={classes.msgWrapper}>
+			<div className={classes.iconWrapper}>
+				<CameraAltOutlined />
+			</div>
+			<Typography variant="body2">No posts for this user</Typography>
+		</div>
+	);
 
 	if (loading) return null;
 	return (
@@ -113,12 +148,16 @@ function UserProfileOverview({ user }) {
 			<Divider />
 
 			{/* latest 3 posts */}
-			<Grid container>{mappedPosts}</Grid>
+			<Grid container>
+				<IF condition={mappedPosts.length !== 0} elseChildren={noPostsMessage}>
+					{mappedPosts}
+				</IF>
+			</Grid>
 
 			{/* actions with the user - message - follow or un follow */}
 			<CardActions className={classes.actions}>
-				<IF condition={loggedUser != "no user"}>
-					<NormalUserActions user={user} />
+				<IF condition={loggedUser != "no user" && loggedUser.id !== id}>
+					<NormalUserActions fullWidthFollowButton={true} user={user} />
 				</IF>
 			</CardActions>
 		</Paper>
