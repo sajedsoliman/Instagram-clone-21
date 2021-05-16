@@ -1,23 +1,27 @@
-import firebase from "firebase"
+import firebase from "firebase";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDccjn4aW53tjHS9fTo_zrtOG0eA8jc2lw",
-    authDomain: "insta-clone-2-4dd4b.firebaseapp.com",
-    projectId: "insta-clone-2-4dd4b",
-    storageBucket: "insta-clone-2-4dd4b.appspot.com",
-    messagingSenderId: "911012622654",
-    appId: "1:911012622654:web:36e414e09d0f4d1b0dbc6f"
+	apiKey: "AIzaSyDRM6oXNZipwW_PSPhMR4HKwitWChAdtwg",
+	authDomain: "instagram-cloone-869b7.firebaseapp.com",
+	projectId: "instagram-cloone-869b7",
+	storageBucket: "instagram-cloone-869b7.appspot.com",
+	messagingSenderId: "997255234350",
+	appId: "1:997255234350:web:94d89f4e966660102e70bf",
+	measurementId: "G-RFHTQ34N3W",
 };
 
+let firebaseInit;
+if (!firebase.apps.length) {
+	firebaseInit = firebase.initializeApp(firebaseConfig);
+} else {
+	firebaseInit = firebase.app();
+}
+const db = firebaseInit.firestore();
 
-const firebaseInit = firebase.initializeApp(firebaseConfig)
+const auth = firebase.auth();
 
-const db = firebaseInit.firestore()
+const storage = firebase.storage();
 
-const auth = firebase.auth()
+const batch = db.batch();
 
-const storage = firebase.storage()
-
-const batch = db.batch()
-
-export { db, auth, firebase, storage, batch }
+export { db, auth, firebase, storage, batch };

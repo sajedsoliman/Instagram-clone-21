@@ -1,71 +1,75 @@
 // To Show search members in a popup
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from "react";
 
 // UI imports
-import { makeStyles } from '@material-ui/core'
+import { makeStyles, MenuList } from "@material-ui/core";
 
 // Component imports
-import CustomMenuList from '../../common-components/CustomMenuList'
-import Store from '../../common-components/firebase/Store'
-import SearchMemberCard from '../../common-components/user-related/SearchMemberCard'
+import CustomMenuList from "../../common-components/CustomMenuList";
+import Store from "../../common-components/firebase/Store";
+import SearchMemberCard from "../../common-components/user-related/SearchMemberCard";
 
 // style stuff
-const useStyles = makeStyles(theme => ({
-    menu: {
-        minWidth: 350
-    },
-}))
+const useStyles = makeStyles((theme) => ({
+	menu: {
+		minWidth: 350,
+		"&:focus": {
+			outline: "none",
+		},
+	},
+}));
 
 function SearchResults(props) {
-    const classes = useStyles()
+	const classes = useStyles();
 
-    // Destructuring props
-    const { anchorEl, searchText, resetSearch } = props
+	// Destructuring props
+	const { anchorEl, searchText, resetSearch } = props;
 
-    // State vars
-    const [open, setOpen] = useState(false)
-    const [members, setMembers] = useState([])
+	// State vars
+	const [open, setOpen] = useState(false);
+	const [members, setMembers] = useState([]);
 
-    // import Store component
-    const { getSearchMembers } = Store()
+	// import Store component
+	const { getSearchMembers } = Store();
 
-    // useEffect to listen to search input text changing
-    useEffect(() => {
-        // check if the text is empty => set open to false
-        if (searchText == "") {
-            setOpen(false)
-            setMembers([])
-        } else if (searchText != "" && anchorEl.current) {
-            setOpen(true)
+	// useEffect to listen to search input text changing
+	useEffect(() => {
+		// check if the text is empty => set open to false
+		if (searchText == "") {
+			setOpen(false);
+			setMembers([]);
+		} else if (searchText != "" && anchorEl.current) {
+			setOpen(true);
 
-            // fetch members from db
-            getSearchMembers(searchText, setMembers)
-        }
+			// fetch members from db
+			getSearchMembers(searchText, setMembers);
+		}
+	}, [searchText]);
 
-    }, [searchText])
+	// close search menu handler
+	const handleClose = () => {
+		resetSearch();
+		setOpen(false);
+	};
 
-    // close search menu handler
-    const handleClose = () => {
-        resetSearch()
-        setOpen(false)
-    }
+	// map through search members
+	const mappedMembers = members.map((member) => {
+		return <SearchMemberCard key={member.objectID} member={member} closePopper={handleClose} />;
+	});
 
-    // map through search members
-    const mappedMembers = members.map(member => {
-        return <SearchMemberCard key={member.objectID} member={member} closePopper={handleClose} />
-    })
-
-    return (
-        <CustomMenuList
-            menuClassName={classes.menu}
-            placement="top"
-            anchorEl={anchorEl?.current}
-            open={open}
-            handleClose={handleClose}>
-            {mappedMembers}
-        </CustomMenuList>
-    )
+	return (
+		<CustomMenuList
+			placement="top"
+			anchorEl={anchorEl?.current}
+			open={open}
+			handleClose={handleClose}
+		>
+			<MenuList autoFocusItem={true} disablePadding className={classes.menu}>
+				{mappedMembers}
+			</MenuList>
+		</CustomMenuList>
+	);
 }
 
-export default SearchResults
+export default SearchResults;
