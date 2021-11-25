@@ -1,23 +1,28 @@
 // Router
-import { Redirect, Route } from 'react-router-dom'
+import { Redirect, Route } from "react-router-dom";
 
 // Contexts - to get the already logged user
-import { AuthedUser } from '../../user-context/AuthedUserContext'
+import { AuthedUser } from "../../user-context/AuthedUserContext";
 
 function UnAuthRoute({ children, ...other }) {
-    const loggedUser = AuthedUser()
+	const loggedUser = AuthedUser();
 
-    return (
-        <Route {...other} render={({ location }) =>
-            loggedUser == "no user" ? (
-                children
-            ) : (
-                <Redirect to={{
-                    pathname: "/",
-                }} />
-            )
-        } />
-    )
+	return (
+		<Route
+			{...other}
+			render={({ location }) =>
+				loggedUser == "no user" ? (
+					children
+				) : (
+					<Redirect
+						to={{
+							pathname: "/",
+						}}
+					/>
+				)
+			}
+		/>
+	);
 }
 
-export default UnAuthRoute
+export default UnAuthRoute;
